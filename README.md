@@ -111,7 +111,7 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-openapi-runtime.git", .upToNextMinor(from: "1.0.0")),
     .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", branch: "1.0.0-alpha.1"),
     .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", branch: "main"),
-    .package(path: "../swift-openapi-lambda") 
+    .package(url: "https://github.com/sebsto/swift-openapi-lambda", branch: "main") 
   ],
   targets: [
     .executableTarget(
@@ -253,6 +253,48 @@ EOF
 sam build
 ```
 
+4. Deploy the Lambda function and creates an API Gateway in front of it
+
+```sh
+# use --guided for the first deployment. SAM cli collects a few parameters and store them in `samconfig.toml`
+sam deploy --guided 
+```
+
+This command outputs the URL of the API GAteway, for example:
+
+```sh
+Outputs                                                                                                                     
+-----------------------------------------------------------------------------------------------------------------------------
+Key                 SwiftAPIEndpoint                                                                                        
+Description         API Gateway endpoint URL for your application                                                           
+Value               https://747ukfmah7.execute-api.us-east-1.amazonaws.com                                                  
+-----------------------------------------------------------------------------------------------------------------------------
+```
+
+5. Test your setup
+
+```sh
+curl https://747ukfmah7.execute-api.us-east-1.amazonaws.com/stocks/AAPL
+{
+  "change" : -4,
+  "changePercent" : -0.030052760210257923,
+  "price" : 111,
+  "symbol" : "AAPL",
+  "timestamp" : "2023-12-13T03:12:35Z",
+  "volume" : 63812
+}
+```
+
+## Local Testing 
+
+```
+git clone https://github.com/sebsto/swift-openapi-lambda.git && cd swift-openapi-lambda
+# In the directory of the Swift OpenAPI Lambda transport project
+LOCAL_LAMBDA_SERVER_ENABLED=true swift run 
+
+# from another terminal, in the directory of the QuoteAPI sample project
+curl -v -X POST --header "Content-Type: application/json" --data @events/GetQuote.json  http://127.0.0.1:7000/invoke
+```
 
 ## References 
 
@@ -266,3 +308,7 @@ To get started with the Swift OpenAPI generator, check out the full [documentati
 The Swift Runtime for AWS Lambda allows you to write AWS Lambda functions in the Swift programming language.
 
 To get started, check out [this step-by-step tutorial](https://swiftpackageindex.com/swift-server/swift-aws-lambda-runtime/main/tutorials/table-of-content) and [the documentation](https://swiftpackageindex.com/swift-server/swift-aws-lambda-runtime).
+
+### Serverless Application Model (SAM) 
+
+Read "[What is SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)" to understand and get started with SAM.

@@ -1,0 +1,6 @@
+.aws-sam/
+*/build/*
+.build
+.swiftpm
+samconfig.toml
+

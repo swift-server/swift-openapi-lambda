@@ -1,0 +1,47 @@
+# NOTE: This file is not designed to be run independently.
+#
+# Instead, use it with a file for a specific OS and Swift version, for example:
+#
+# % docker-compose \
+#   -f docker/docker-compose.yaml \
+#   -f docker/docker-compose.2204.59.yaml \
+#   run test
+#
+version: "3"
+
+services:
+  runtime-setup:
+    image: &image swift-openapi-lambda:default
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+  common: &common
+    image: *image
+    depends_on: [runtime-setup]
+    volumes:
+      - ~/.ssh:/root/.ssh
+      - ..:/code:z
+    working_dir: /code
+
+  soundness:
+    <<: *common
+    command: /bin/bash -xcl "swift -version && uname -a && ./scripts/soundness.sh"
+
+  test:
+    <<: *common
+    command: /bin/bash -xcl "swift test"
+
+  shell:
+    <<: *common
+    entrypoint: /bin/bash
+
+  compatibility-test:
+    <<: *common
+    command: /bin/bash -xcl "cat /proc/cpuinfo && cat /proc/meminfo && swift test"
+
+  docc-test:
+    <<: *common
+    command: /bin/bash -xcl "swift -version && uname -a && bash ./scripts/check-for-docc-warnings.sh"
+    environment:
+      DOCC_TARGET: OpenAPILambda

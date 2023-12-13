@@ -2,9 +2,6 @@ import AWSLambdaRuntime
 import AWSLambdaEvents
 import HTTPTypes
 
-//temp
-import Foundation
-
 extension OpenAPILambda where Event == APIGatewayV2Request {
     /// Transform a Lambda input (`APIGatewayV2Request` and `LambdaContext`) to an OpenAPILambdaRequest (`HTTPRequest`, `String?`)
     public func request(context: LambdaContext, from request: Event) throws -> OpenAPILambdaRequest {

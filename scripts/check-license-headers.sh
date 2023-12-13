@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 ##===----------------------------------------------------------------------===##
 ##
-## This source file is part of the SwiftOpenAPIGenerator open source project
+## This source file is part of the Swift OpenAPI Lambda open source project
 ##
-## Copyright (c) 2023 Apple Inc. and the SwiftOpenAPIGenerator project authors
+## Copyright (c) 2023 Amazon.com, Inc. or its affiliates
+##                    and the Swift OpenAPI Lambda project authors
 ## Licensed under Apache License v2.0
 ##
 ## See LICENSE.txt for license information
-## See CONTRIBUTORS.txt for the list of SwiftOpenAPIGenerator project authors
+## See CONTRIBUTORS.txt for the list of Swift OpenAPI Lambda project authors
 ##
 ## SPDX-License-Identifier: Apache-2.0
 ##
@@ -23,13 +24,14 @@ REPO_ROOT="$(git -C "${CURRENT_SCRIPT_DIR}" rev-parse --show-toplevel)"
 
 EXPECTED_FILE_HEADER_TEMPLATE="@@===----------------------------------------------------------------------===@@
 @@
-@@ This source file is part of the SwiftOpenAPIGenerator open source project
+@@ This source file is part of the Swift OpenAPI Lambda open source project
 @@
-@@ Copyright (c) YEARS Apple Inc. and the SwiftOpenAPIGenerator project authors
+@@ Copyright (c) YEARS Amazon.com, Inc. or its affiliates
+@@                    and the Swift OpenAPI Lambda project authors
 @@ Licensed under Apache License v2.0
 @@
 @@ See LICENSE.txt for license information
-@@ See CONTRIBUTORS.txt for the list of SwiftOpenAPIGenerator project authors
+@@ See CONTRIBUTORS.txt for the list of Swift OpenAPI Lambda project authors
 @@
 @@ SPDX-License-Identifier: Apache-2.0
 @@
@@ -53,8 +55,6 @@ read -ra PATHS_TO_CHECK_FOR_LICENSE <<< "$( \
   ":(exclude)README.md" \
   ":(exclude)SECURITY.md" \
   ":(exclude)scripts/unacceptable-language.txt" \
-  ":(exclude)Tests/PetstoreConsumerTests/Generated" \
-  ":(exclude)Tests/OpenAPIGeneratorReferenceTests/Resources/ReferenceSources/*" \
   ":(exclude)docker/*" \
   ":(exclude)**/*.docc/*" \
   ":(exclude)**/.gitignore" \
@@ -63,20 +63,14 @@ read -ra PATHS_TO_CHECK_FOR_LICENSE <<< "$( \
   ":(exclude)**/README.md" \
   ":(exclude)**/openapi.yaml" \
   ":(exclude)**/openapi.yml" \
-  ":(exclude)**/petstore.yaml" \
   ":(exclude)**/openapi-generator-config.yaml" \
   ":(exclude)**/openapi-generator-config.yml" \
   ":(exclude)**/docker-compose.yaml" \
   ":(exclude)**/docker/*" \
   ":(exclude)**/.dockerignore" \
-  ":(exclude)Plugins/OpenAPIGenerator/PluginsShared" \
-  ":(exclude)Plugins/OpenAPIGeneratorCommand/PluginsShared" \
-  ":(exclude)Examples/HelloWorldiOSClientAppExample/HelloWorldiOSClientApp.*" \
-  ":(exclude)Examples/HelloWorldiOSClientAppExample/HelloWorldiOSClientApp/Assets.xcassets/*" \
-  ":(exclude)Examples/HelloWorldiOSClientAppExample/HelloWorldiOSClientApp/Preview*" \
-  ":(exclude)Examples/**/Generated*" \
   ":(exclude)**/Makefile" \
   ":(exclude)**/*.html" \
+  ":(exclude)**/*.gif" \
   | xargs -0 \
 )"
 

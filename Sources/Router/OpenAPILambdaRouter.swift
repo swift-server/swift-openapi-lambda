@@ -7,7 +7,6 @@ public enum LambdaOpenAPIRouterError: Error {
     case noRouteForPath(String)
     case noHandlerForPath(String)
     case noRouteForMethod(HTTPRequest.Method)
-    case invalidMethod(String)
 }
 
 /// A router API

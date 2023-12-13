@@ -1,6 +1,5 @@
 import Foundation
 import AWSLambdaRuntime
-import AWSLambdaEvents
 import OpenAPIRuntime
 import HTTPTypes
 

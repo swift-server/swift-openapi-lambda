@@ -62,7 +62,7 @@ import Foundation
 import OpenAPIRuntime
 import OpenAPILambda // <-- add this line 
 
-@main
+@main // <-- Flag this struct as the executable target entrypoint
 struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi { // <-- add the OpenAPILambdaHttpApi protocol 
 
   init(transport: LambdaOpenAPITransport) throws { // <-- add this constructor (don't remove the call to `registerHandlers(on:)`)
@@ -406,9 +406,115 @@ LOCAL_LAMBDA_SERVER_ENABLED=true swift run
 curl -v -X POST --header "Content-Type: application/json" --data @events/GetQuote.json  http://127.0.0.1:7000/invoke
 ```
 
-## Implement your own `OpenAPILambda` to support other event types 
+## Implement your own `OpenAPILambda` to support other event types
 
-TBD
+When you expose your AWS Lambda function to other event types, you have to specialize the `OpenAPILambda` protocol and implement the two methods that transform your Lambda function input data to an `OpenAPIRequest` and the other way around, transform an `OpenAPIResponse` to your Lambda function output type.
+
+Here is an example with the [Amazon API Gateway (Rest Api)](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-rest-api.htm), (aka the original API Gateway).
+
+I start with an OpenAPI stub implementation - unmodified.
+
+```swift
+import Foundation
+import OpenAPIRuntime
+
+struct QuoteServiceImpl: APIProtocol {
+  func getQuote(_ input: Operations.getQuote.Input) async throws -> Operations.getQuote.Output {
+
+    let symbol = input.path.symbol
+
+    let price = Components.Schemas.quote(
+        symbol: symbol,
+        price: Double.random(in: 100..<150).rounded(),
+        change: Double.random(in: -5..<5).rounded(),
+        changePercent: Double.random(in: -0.05..<0.05),
+        volume: Double.random(in: 10000..<100000).rounded(),
+        timestamp: Date())
+
+    return .ok(.init(body: .json(price)))
+  }
+}
+```
+
+Next, I implement a `struct` that conforms to `OpenAPILambda`. This `struct` defines:
+
+-  the event input and output the Lambda function will work on (from [AWS Lambda Event Types](https://github.com/swift-server/swift-aws-lambda-events) library).
+- the mandatory constructor `init(transport:)`
+- the executable target entrypoint (`@main`)
+
+Here is an example using `APIGatewayRequest` and `APIGatewayResponse`:
+
+```swift
+@main
+struct QuoteServiceLambda: OpenAPILambda {
+  typealias Event = APIGatewayRequest
+  typealias Output = APIGatewayResponse
+  public init(transport: LambdaOpenAPITransport) throws {
+    let openAPIHandler = QuoteServiceImpl()
+    try openAPIHandler.registerHandlers(on: transport)
+  }
+}
+```
+
+Next step is to implement two methods from `OpenAPILambda` protocol to convert your Lambda function input data (`APIGatewayRequest`) to an `OpenAPIRequest` and the other way around, transform an `OpenAPIResponse` to your Lambda function output type (`APIGatewayResponses`).
+
+```swift
+extension OpenAPILambda where Event == APIGatewayRequest {
+    /// Transform a Lambda input (`APIGatewayRequest` and `LambdaContext`) to an OpenAPILambdaRequest (`HTTPRequest`, `String?`)
+    public func request(context: LambdaContext, from request: Event) throws -> OpenAPILambdaRequest {
+        (try request.httpRequest(), request.body)
+    }
+}
+
+extension OpenAPILambda where Output == APIGatewayResponse {
+    /// Transform an OpenAPI response (`HTTPResponse`, `String?`) to a Lambda Output (`APIGatewayResponse`)
+    public func output(from response: OpenAPILambdaResponse) -> Output {
+        var apiResponse = APIGatewayResponse(from: response.0)
+        apiResponse.body = response.1
+        return apiResponse
+    }
+}
+```
+
+To keep the above code short, simple, and readable, we suggest to implement whatever extension on the Lambda event type.  Here are the extensions required to support the above code. These are simple data transformation methods from one type to the other.
+
+```swift
+extension APIGatewayRequest {
+    
+    /// Return an `HTTPRequest.Method` for this `APIGatewayRequest`
+    public func httpRequestMethod() throws -> HTTPRequest.Method {
+        guard let method = HTTPRequest.Method(rawValue: self.httpMethod.rawValue) else {
+            throw LambdaOpenAPIHttpError.invalidMethod(self.httpMethod.rawValue)
+        }
+        return method
+    }
+
+    /// Return an `HTTPRequest` for this `APIGatewayV2Request`
+    public func httpRequest() throws -> HTTPRequest {
+        try HTTPRequest(
+            method: self.httpRequestMethod(),
+            scheme: "https",
+            authority: "",
+            path: self.path,
+            headerFields: self.headers.httpFields()
+        )
+    }
+}
+
+extension APIGatewayResponse {
+    
+    /// Create a `APIGatewayV2Response` from an `HTTPResponse`
+    public init(from response: HTTPResponse) {
+        self = APIGatewayResponse(
+            statusCode: .init(code: UInt(response.status.code)),
+            headers: .init(from: response.headerFields),
+            isBase64Encoded: false
+        )
+    }
+}
+```
+
+You can apply the same design to support other AWS Lambda event types. However, keep in mind that the `OpenAPILAmbda` implementation is heavily biased towards receiving, routing, and responding to HTTP requests. 
 
 ## References 
 

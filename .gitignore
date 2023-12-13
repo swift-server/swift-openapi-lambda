@@ -3,4 +3,5 @@
 .build
 .swiftpm
 samconfig.toml
+*key
 

@@ -57,15 +57,19 @@ To expose your OpenAPI implementation as an AWS Lambda function:
 
 2. Add a protocol and a constructor to your existing OpenAPI service implementation 
 
+![Animated GIF to show the changes](assets/swift-openapi-lambda.gif)
+
+There are only four changes to make to your existing implementation:
+
 ```swift
 import Foundation
 import OpenAPIRuntime
-import OpenAPILambda // <-- add this line 
+import OpenAPILambda // <-- 1. import this library 
 
-@main // <-- Flag this struct as the executable target entrypoint
-struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi { // <-- add the OpenAPILambdaHttpApi protocol 
+@main // <-- 2. flag this struct as the executable target entrypoint
+struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi { // <-- 3. add the OpenAPILambdaHttpApi protocol 
 
-  init(transport: LambdaOpenAPITransport) throws { // <-- add this constructor (don't remove the call to `registerHandlers(on:)`)
+  init(transport: LambdaOpenAPITransport) throws { // <-- 4. add this constructor (don't remove the call to `registerHandlers(on:)`)
     try self.registerHandlers(on: transport)
   }
 
@@ -406,7 +410,7 @@ LOCAL_LAMBDA_SERVER_ENABLED=true swift run
 curl -v -X POST --header "Content-Type: application/json" --data @events/GetQuote.json  http://127.0.0.1:7000/invoke
 ```
 
-## Implement your own `OpenAPILambda` to support other event types
+## Implement your own `OpenAPILambda` to support other AWS Lambda event types
 
 When you expose your AWS Lambda function to other event types, you have to specialize the `OpenAPILambda` protocol and implement the two methods that transform your Lambda function input data to an `OpenAPIRequest` and the other way around, transform an `OpenAPIResponse` to your Lambda function output type.
 

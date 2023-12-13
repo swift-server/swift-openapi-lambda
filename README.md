@@ -13,7 +13,59 @@ To write and deploy AWS Lambda functions based on an OpenAPI API definition, you
 - the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) - a command-line tool used to create serverless workloads on AWS
 - the [Docker Desktop](https://www.docker.com/products/docker-desktop/) - to compile your Swift code for Linux deployment to AWS Lambda
 
-## TL;DR (aka Quick Start with a Stock Quote API service example)
+## TL;DR 
+
+Assuming you already have an OpenAPI definition and you already generated the server stubs. Here are the additional steps to expose your service implementation as a AWS Lambda function.
+
+If you don't know how to do that, read on, there is [a tutorial with step-by-step instructions](#tutorial-a-quick-start-with-a-stock-quote-api-service-example).
+
+1. Add the dependency to your `Package.swift`
+
+```swift
+  dependencies: [
+    .package(url: "https://github.com/apple/swift-openapi-generator.git", .upToNextMinor(from: "1.0.0-alpha.1")),
+    .package(url: "https://github.com/apple/swift-openapi-runtime.git", .upToNextMinor(from: "1.0.0")),
+    .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", branch: "1.0.0-alpha.1"),
+    .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", branch: "main"),
+    .package(url: "https://github.com/sebsto/swift-openapi-lambda", branch: "main") 
+  ],
+```
+
+```swift
+    .executableTarget(
+      name: "YourOpenAPIService",
+      dependencies: [
+        .product(name: "AWSLambdaRuntime", package: "swift-aws-lambda-runtime"),
+        .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-events"),
+        .product(name: "OpenAPIRuntime",package: "swift-openapi-runtime"),
+        .product(name: "OpenAPILambda",package: "swift-openapi-lambda"),
+      ],
+```
+
+2. Create a AWS Lambda function that consumes your OpenAPI implementation
+
+```swift
+import AWSLambdaEvents
+import OpenAPILambda
+
+@main
+struct QuoteServiceLambda: OpenAPILambda {
+  
+  typealias Event = APIGatewayV2Request
+  typealias Output = APIGatewayV2Response
+
+  public init(transport: LambdaOpenAPITransport) throws {
+    let openAPIHandler = QuoteServiceImpl()
+    try openAPIHandler.registerHandlers(on: transport)
+  }
+}
+```
+
+3. Package and deploy your Lambda function and an HTTP API Gateway (aka `APIGatewayV2`)
+
+🎉 Enjoy!
+
+## Tutorial (a Quick Start with a Stock Quote API service example)
 
 ### Part 1 - the Swift OpenAPI part
 
@@ -180,7 +232,7 @@ EOF
 
 ```sh
 cat << EOF > Sources/Lambda.swift
-mport AWSLambdaEvents
+import AWSLambdaEvents
 import OpenAPILambda
 
 @main

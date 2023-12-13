@@ -61,7 +61,7 @@ struct QuoteServiceLambda: OpenAPILambda {
 }
 ```
 
-3. Package and deploy your Lambda function and an HTTP API Gateway (aka `APIGatewayV2`)
+3. Package and deploy your Lambda function + create an HTTP API Gateway (aka `APIGatewayV2`)
 
 🎉 Enjoy!
 

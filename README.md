@@ -111,6 +111,12 @@ swift package init --name quoteapi --type executable
 2. Write or import an OpenAI API definition in YAML or JSON 
 
 ```yaml
+#
+# the $ signs are escaped (\$) to work with the cat << EOF command
+# if you choose to copy the content directly to a text editor,
+# be sure to remove the \ (that means \$ becomes $)
+#
+
 cat << EOF > Sources/openapi.yaml
 openapi: 3.1.0
 info:
@@ -155,12 +161,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/quote'
+                \$ref: '#/components/schemas/quote'
         400:
           description: Bad Request
         404:
           description: Not Found
-EOF		  
+EOF
 ```
 
 3. Add a Swift OpenAPI generator configuration file to generate only the server side 
@@ -170,7 +176,7 @@ cat << EOF > Sources/openapi-generator-config.yaml
 generate:
   - types
   - server
-EOF 
+EOF
 ```
 
 4. Use this `Package.swift` file to define targets and their dependencies
@@ -191,7 +197,7 @@ let package = Package(
     .executable(name: "QuoteService", targets: ["QuoteService"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-generator.git", .upToNextMinor(from: "1.0.0-alpha.1")),
+    .package(url: "https://github.com/apple/swift-openapi-generator.git", .upToNextMinor(from: "1.0.0")),
     .package(url: "https://github.com/apple/swift-openapi-runtime.git", .upToNextMinor(from: "1.0.0")),
     .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", branch: "1.0.0-alpha.1"),
     .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", branch: "main"),
@@ -274,6 +280,12 @@ swift build
 1. Add the Lambda build instructions as a Docker file and a Makefile. We build for Swift 5.9 on Amazon Linux 2
 
 ```sh
+#
+# the $ signs are escaped (\$) to work with the cat << EOF command
+# if you choose to copy the content directly to a text editor,
+# be sure to remove the \ (that means \$ becomes $)
+#
+
 cat << EOF > Dockerfile
 # image used to compile your Swift code
 FROM public.ecr.aws/docker/library/swift:5.9.1-amazonlinux2
@@ -298,34 +310,41 @@ tail:
 ######################  No Change required below this line  ##########################
 
 builder-bot:
-	$(eval $@PRODUCT = $(subst build-,,$(MAKECMDGOALS)))
-	$(eval $@BUILD_DIR = $(PWD)/.aws-sam/build-swift)
-	$(eval $@STAGE = $($@BUILD_DIR)/lambda)
-	$(eval $@ARTIFACTS_DIR = $(PWD)/.aws-sam/build/$($@PRODUCT))
+	\$(eval \$@PRODUCT = \$(subst build-,,\$(MAKECMDGOALS)))
+	\$(eval \$@BUILD_DIR = \$(PWD)/.aws-sam/build-swift)
+	\$(eval \$@STAGE = \$(\$@BUILD_DIR)/lambda)
+	\$(eval \$@ARTIFACTS_DIR = \$(PWD)/.aws-sam/build/\$(\$@PRODUCT))
 	
 	# build docker image to compile Swift for Linux
 	docker build -f Dockerfile . -t swift-builder
 
 	# prep directories
-	mkdir -p $($@BUILD_DIR)/lambda $($@ARTIFACTS_DIR)
+	mkdir -p \$(\$@BUILD_DIR)/lambda \$(\$@ARTIFACTS_DIR)
 
 	# compile application inside Docker image using source code from local project folder
-	docker run --rm -v $($@BUILD_DIR):/build-target -v `pwd`:/build-src -w /build-src swift-builder bash -cl "swift build --static-swift-stdlib --product $($@PRODUCT) -c release --build-path /build-target"
+	docker run --rm -v \$(\$@BUILD_DIR):/build-target -v \`pwd\`:/build-src -w /build-src swift-builder bash -cl "swift build --static-swift-stdlib --product \$(\$@PRODUCT) -c release --build-path /build-target"
 	
 	# create lambda bootstrap file
-	docker run --rm -v $($@BUILD_DIR):/build-target -v `pwd`:/build-src -w /build-src swift-builder bash -cl "cd /build-target/lambda && ln -s $($@PRODUCT) /bootstrap"
+	docker run --rm -v \$(\$@BUILD_DIR):/build-target -v \`pwd\`:/build-src -w /build-src swift-builder bash -cl "cd /build-target/lambda && ln -s \$(\$@PRODUCT) /bootstrap"
   
 	# copy binary to stage
-	cp $($@BUILD_DIR)/release/$($@PRODUCT) $($@STAGE)/bootstrap
+	cp \$(\$@BUILD_DIR)/release/\$(\$@PRODUCT) \$(\$@STAGE)/bootstrap
   
   	# copy app from stage to artifacts dir
-	cp $($@STAGE)/* $($@ARTIFACTS_DIR)
+	cp \$(\$@STAGE)/* \$(\$@ARTIFACTS_DIR)
+   
 EOF
 ```
 
 2. Add a SAM template to deploy the Lambda function and the API Gateway
 
 ```sh
+#
+# the $ signs are escaped (\$) to work with the cat << EOF command
+# if you choose to copy the content directly to a text editor,
+# be sure to remove the \ (that means \$ becomes $)
+#
+
 cat << EOF > template.yml
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
@@ -357,7 +376,7 @@ Resources:
 Outputs:
   SwiftAPIEndpoint:
     Description: "API Gateway endpoint URL for your application"
-    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+    Value: !Sub "https://\${ServerlessHttpApi}.execute-api.\${AWS::Region}.amazonaws.com"
 EOF
 ```
 
@@ -370,8 +389,16 @@ sam build
 4. Deploy the Lambda function and create an API Gateway in front of it
 
 ```sh
-# use --guided for the first deployment only. SAM cli collects a few parameters and store them in `samconfig.toml`
-sam deploy --guided 
+# use --guided for the first deployment only.
+# SAM cli collects a few parameters and store them in `samconfig.toml`
+
+sam deploy --guided --stack-name QuoteService
+```
+
+Accept all the default values, except:
+
+```sh
+QuoteService has no authentication. Is this okay? [y/N]: <-- answer Y here 
 ```
 
 This command outputs the URL of the API GAteway, for example:
@@ -388,7 +415,7 @@ Value               https://747ukfmah7.execute-api.us-east-1.amazonaws.com
 5. Test your setup
 
 ```sh
-curl https://747ukfmah7.execute-api.us-east-1.amazonaws.com/stocks/AAPL
+curl [[ Replace with SWIFTAPIEndpoint value ]]/stocks/AAPL
 {
   "change" : -4,
   "changePercent" : -0.030052760210257923,
@@ -398,6 +425,10 @@ curl https://747ukfmah7.execute-api.us-east-1.amazonaws.com/stocks/AAPL
   "volume" : 63812
 }
 ```
+
+6. Delete the infrastructure
+
+There is no cost 
 
 ## Local Testing 
 

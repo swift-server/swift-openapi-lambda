@@ -34,8 +34,8 @@ To expose your OpenAPI implementation as an AWS Lambda function:
 
 ```swift
   dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-generator.git", .upToNextMinor(from: "1.0.0")),
-    .package(url: "https://github.com/apple/swift-openapi-runtime.git", .upToNextMinor(from: "1.0.0")),
+    .package(url: "https://github.com/apple/swift-openapi-generator.git", from: "1.0.0"),
+    .package(url: "https://github.com/apple/swift-openapi-runtime.git", from: "1.0.0"),
     
     // add these three dependencies
     .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", branch: "1.0.0-alpha.1"),
@@ -201,8 +201,8 @@ let package = Package(
     .executable(name: "QuoteService", targets: ["QuoteService"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-generator.git", .upToNextMinor(from: "1.0.0")),
-    .package(url: "https://github.com/apple/swift-openapi-runtime.git", .upToNextMinor(from: "1.0.0")),
+    .package(url: "https://github.com/apple/swift-openapi-generator.git", from: "1.0.0"),
+    .package(url: "https://github.com/apple/swift-openapi-runtime.git", from: "1.0.0"),
     .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", branch: "1.0.0-alpha.1"),
     .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", branch: "main"),
     .package(url: "https://github.com/sebsto/swift-openapi-lambda", branch: "main") 

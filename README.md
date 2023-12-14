@@ -34,8 +34,10 @@ To expose your OpenAPI implementation as an AWS Lambda function:
 
 ```swift
   dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-generator.git", .upToNextMinor(from: "1.0.0-alpha.1")),
+    .package(url: "https://github.com/apple/swift-openapi-generator.git", .upToNextMinor(from: "1.0.0")),
     .package(url: "https://github.com/apple/swift-openapi-runtime.git", .upToNextMinor(from: "1.0.0")),
+    
+    // add these three dependencies
     .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", branch: "1.0.0-alpha.1"),
     .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", branch: "main"),
     .package(url: "https://github.com/sebsto/swift-openapi-lambda", branch: "main") 
@@ -48,18 +50,20 @@ To expose your OpenAPI implementation as an AWS Lambda function:
     .executableTarget(
       name: "YourOpenAPIService",
       dependencies: [
+        .product(name: "OpenAPIRuntime",package: "swift-openapi-runtime"),
+        
+        // add these three dependencies
         .product(name: "AWSLambdaRuntime", package: "swift-aws-lambda-runtime"),
         .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-events"),
-        .product(name: "OpenAPIRuntime",package: "swift-openapi-runtime"),
         .product(name: "OpenAPILambda",package: "swift-openapi-lambda"),
       ],
 ```
 
 2. Add a protocol and a constructor to your existing OpenAPI service implementation 
 
-![Animated GIF to show the changes](assets/swift-openapi-lambda.gif)
-
 There are only four changes to make to your existing implementation:
+
+![Animated GIF to show the changes](assets/swift-openapi-lambda.gif)
 
 ```swift
 import Foundation

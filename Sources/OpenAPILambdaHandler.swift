@@ -13,9 +13,9 @@
 //
 //===----------------------------------------------------------------------===//
 import AWSLambdaRuntime
-import OpenAPIRuntime
-
 import AWSLambdaEvents
+import OpenAPIRuntime
+import HTTPTypes
 
 /// Specialization of LambdaHandler which runs an OpenAPILambda
 public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
@@ -47,21 +47,48 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
     /// - Returns: A Lambda result ot type `Output`.
     public func handle(_ request: Event, context: LambdaContext) async throws -> Output {
 
-        // convert Lambda event source to OpenAPILambdaRequest
-        let request = try lambda.request(context: context, from: request)
+        // by default return HTTP 500
+        var lambdaResponse: OpenAPILambdaResponse = (HTTPResponse(status: .internalServerError), "unknown error")
+        
+        do {
+            // convert Lambda event source to OpenAPILambdaRequest
+            let request = try lambda.request(context: context, from: request)
+            
+            // route the request to find the handlers and extract the paramaters
+            let (handler, parameters) = try await router.route(method: request.0.method, path: request.0.path!)
+            
+            // call the request handler (and extract the HTTPRequest and HTTPBody)
+            let httpRequest = request.0
+            let httpBody = HTTPBody(stringLiteral: request.1 ?? "")
+            let response = try await handler(httpRequest, httpBody, ServerRequestMetadata(pathParameters: parameters))
+            
+            // transform the response to an OpenAPILambdaResponse
+            let maxPayloadSize = 10 * 1024 * 1024  // APIGateway payload is 10M max
+            let body: String? = try? await String(collecting: response.1 ?? "", upTo: maxPayloadSize)
+            lambdaResponse = (response.0, body)
+                        
+        } catch OpenAPILambdaRouterError.noHandlerForPath(let path) {
+            
+            // There is no hadler registered for this path. This is a programming error.
+            lambdaResponse = (HTTPResponse(status: .internalServerError), "There is no OpenAPI handler registered for the path \(path)")
 
-        // route the request to find the handlers and extract the paramaters
-        let (handler, parameters) = try await router.route(method: request.0.method, path: request.0.path!)
+        } catch OpenAPILambdaRouterError.noRouteForMethod(let method) {
+            
+            // There is no hadler registered for this path. This is a programming error.
+            lambdaResponse = (HTTPResponse(status: .notFound), "There is no route registered for the method \(method)")
 
-        // call the request handler (and extract the HTTPRequest and HTTPBody)
-        let httpRequest = request.0
-        let httpBody = HTTPBody(stringLiteral: request.1 ?? "")
-        let response = try await handler(httpRequest, httpBody, ServerRequestMetadata(pathParameters: parameters))
+        } catch OpenAPILambdaRouterError.noRouteForPath(let path) {
+            
+            // There is no hadler registered for this path. This is a programming error.
+            lambdaResponse = (HTTPResponse(status: .notFound), "There is no route registered for the path \(path)")
 
-        // transform the response to an OpenAPILambdaResponse
-        let maxPayloadSize = 10 * 1024 * 1024  // APIGateway payload is 10M max
-        let body: String? = try? await String(collecting: response.1 ?? "", upTo: maxPayloadSize)
-        let lambdaResponse: OpenAPILambdaResponse = (response.0, body)
+        } catch OpenAPILambdaHttpError.invalidMethod(let method) {
+            
+            // the APIGateway HTTP verb is rejected by HTTTypes HTTPRequest.Method => HTTP 500
+            // this should never happen
+            lambdaResponse = (HTTPResponse(status: .internalServerError), "Type mismatch between APIGatewayV2 and HTTPRequest.Method. \(method) verb is rejected by HTTPRequest.Method 🤷‍♂️")
+
+        }
 
         // transform the OpenAPILambdaResponse to the Lambda Output
         return lambda.output(from: lambdaResponse)

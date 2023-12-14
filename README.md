@@ -426,9 +426,19 @@ curl [[ Replace with SWIFTAPIEndpoint value ]]/stocks/AAPL
 }
 ```
 
-6. Delete the infrastructure
+## Deployment costs
 
-There is no cost 
+On new AWS accounts, there is no cost associated with teh deployment and test of this sample code. It falls under the permananet AWS free Tier for [AWS Lambda](https://aws.amazon.com/lambda/pricing/) and [Amazon API Gateway](https://aws.amazon.com/lambda/pricing/)
+
+When you're account is older than a year, you are charged $1.0 per million calls to the API Gateway.
+
+## Cleanup 
+
+To delete the AWS Lambda function, the API Gateway, and the roles and permissions created with `sam`, just type:
+
+```sh
+sam delete
+```
 
 ## Local Testing 
 

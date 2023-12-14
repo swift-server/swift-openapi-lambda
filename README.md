@@ -370,7 +370,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Events:
-        # handles all GET / method of the REST API
+        # pass through all HTTP verbs and paths
         Api:
           Type: HttpApi
     Metadata:

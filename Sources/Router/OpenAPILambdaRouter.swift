@@ -17,14 +17,14 @@ import Foundation
 import HTTPTypes
 
 /// Errors returned by the router
-public enum LambdaOpenAPIRouterError: Error {
+public enum OpenAPILambdaRouterError: Error {
     case noRouteForPath(String)
     case noHandlerForPath(String)
     case noRouteForMethod(HTTPRequest.Method)
 }
 
 /// A router API
-public protocol LambdaOpenAPIRouter {
+public protocol OpenAPILambdaRouter {
     /// add a route for a given HTTP method and path and associate a handler
     func add(method: HTTPRequest.Method, path: String, handler: @escaping OpenAPIHandler) throws
 

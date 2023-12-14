@@ -33,7 +33,7 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
     ///   - context: Lambda initialization context
     public init(context: LambdaInitializationContext) throws {
         self.router = TrieRouter()
-        self.transport = LambdaOpenAPITransport(router: self.router)
+        self.transport = OpenAPILambdaTransport(router: self.router)
         self.lambda = try .init(transport: self.transport)
     }
 
@@ -67,7 +67,7 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
         return lambda.output(from: lambdaResponse)
     }
 
-    let router: LambdaOpenAPIRouter
-    let transport: LambdaOpenAPITransport
+    let router: OpenAPILambdaRouter
+    let transport: OpenAPILambdaTransport
     let lambda: L
 }

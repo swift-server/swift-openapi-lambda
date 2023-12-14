@@ -21,7 +21,7 @@ extension APIGatewayV2Request {
     /// Return an `HTTPRequest.Method` for this `APIGatewayV2Request`
     public func httpRequestMethod() throws -> HTTPRequest.Method {
         guard let method = HTTPRequest.Method(rawValue: self.context.http.method.rawValue) else {
-            throw LambdaOpenAPIHttpError.invalidMethod(self.context.http.method.rawValue)
+            throw OpenAPILambdaHttpError.invalidMethod(self.context.http.method.rawValue)
         }
         return method
     }

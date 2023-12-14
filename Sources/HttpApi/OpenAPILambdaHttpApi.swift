@@ -19,7 +19,7 @@ import OpenAPIRuntime
 import HTTPTypes
 
 /// The errors that can be generated
-public enum LambdaOpenAPIHttpError: Error {
+public enum OpenAPILambdaHttpError: Error {
     case invalidMethod(String)
 }
 

@@ -15,7 +15,7 @@
 import HTTPTypes
 
 /// A Trie router implementation
-public struct TrieRouter: LambdaOpenAPIRouter {
+public struct TrieRouter: OpenAPILambdaRouter {
     private let uriPath: URIPathCollection = URIPath()
 
     /// add a route for a given HTTP method and path and associate a handler
@@ -88,16 +88,16 @@ struct URIPath: URIPathCollection {
     ///     - the OpenAPIHandler for this path
     ///     - the OpenAI ServerRequestMetadata (a [String:String] with parameter names and their values
     /// - Throws:
-    ///     - LambdaOpenAPIRouterError.noRouteForPath when there is no handler in the graph for the given combination of HTTP method and path
-    ///     - LambdaOpenAPIRouterError.noRouteForMethod when there is no handler for that HTTP method
-    ///     - LambdaOpenAPIRouterError.noHandlerForPath when there is no handler as leaf node of the tree. This is a programming error and should not happen
+    ///     - OpenAPILambdaRouterError.noRouteForPath when there is no handler in the graph for the given combination of HTTP method and path
+    ///     - OpenAPILambdaRouterError.noRouteForMethod when there is no handler for that HTTP method
+    ///     - OpenAPILambdaRouterError.noHandlerForPath when there is no handler as leaf node of the tree. This is a programming error and should not happen
     func find(method: HTTPRequest.Method, path: String) throws -> (OpenAPIHandler, OpenAPILambdaRequestParameters) {
         var parameters: OpenAPILambdaRequestParameters = [:]
         let root: Node = root()
 
         // first node is the HTTP Method
         guard let nodeHTTP = root.children[method.rawValue] else {
-            throw LambdaOpenAPIRouterError.noRouteForMethod(method)
+            throw OpenAPILambdaRouterError.noRouteForMethod(method)
         }
 
         // search for each path component.  If a component is not found, it might be a parameter
@@ -125,18 +125,18 @@ struct URIPath: URIPathCollection {
                     currentNode = child
                 }
                 else {
-                    throw LambdaOpenAPIRouterError.noRouteForPath(path)
+                    throw OpenAPILambdaRouterError.noRouteForPath(path)
                 }
             }
         }
 
         //at this stage, current node must have a handler child
         guard let handlerNode = currentNode.handlerChild() else {
-            throw LambdaOpenAPIRouterError.noHandlerForPath(path)
+            throw OpenAPILambdaRouterError.noHandlerForPath(path)
         }
 
         // did we found an handler ?
-        guard let handler = handlerNode.value.handler else { throw LambdaOpenAPIRouterError.noHandlerForPath(path) }
+        guard let handler = handlerNode.value.handler else { throw OpenAPILambdaRouterError.noHandlerForPath(path) }
         return (handler, parameters)
     }
 

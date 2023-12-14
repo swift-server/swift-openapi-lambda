@@ -26,7 +26,7 @@ public protocol OpenAPILambda {
     /// Initialize application.
     ///
     /// This is where you create your OpenAPI service implementation and register the transport
-    init(transport: LambdaOpenAPITransport) throws
+    init(transport: OpenAPILambdaTransport) throws
 
     /// Convert from `Event` type to `OpenAPILambdaRequest`
     /// - Parameters:

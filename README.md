@@ -69,7 +69,7 @@ import OpenAPILambda // <-- 1. import this library
 @main // <-- 2. flag this struct as the executable target entrypoint
 struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi { // <-- 3. add the OpenAPILambdaHttpApi protocol 
 
-  init(transport: LambdaOpenAPITransport) throws { // <-- 4. add this constructor (don't remove the call to `registerHandlers(on:)`)
+  init(transport: OpenAPILambdaTransport) throws { // <-- 4. add this constructor (don't remove the call to `registerHandlers(on:)`)
     try self.registerHandlers(on: transport)
   }
 
@@ -247,7 +247,7 @@ import OpenAPILambda
 @main
 struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
 
-  init(transport: LambdaOpenAPITransport) throws {
+  init(transport: OpenAPILambdaTransport) throws {
     try self.registerHandlers(on: transport)
   }
 
@@ -494,7 +494,7 @@ Here is an example using `APIGatewayRequest` and `APIGatewayResponse`:
 struct QuoteServiceLambda: OpenAPILambda {
   typealias Event = APIGatewayRequest
   typealias Output = APIGatewayResponse
-  public init(transport: LambdaOpenAPITransport) throws {
+  public init(transport: OpenAPILambdaTransport) throws {
     let openAPIHandler = QuoteServiceImpl()
     try openAPIHandler.registerHandlers(on: transport)
   }
@@ -529,7 +529,7 @@ extension APIGatewayRequest {
     /// Return an `HTTPRequest.Method` for this `APIGatewayRequest`
     public func httpRequestMethod() throws -> HTTPRequest.Method {
         guard let method = HTTPRequest.Method(rawValue: self.httpMethod.rawValue) else {
-            throw LambdaOpenAPIHttpError.invalidMethod(self.httpMethod.rawValue)
+            throw OpenAPILambdaHttpError.invalidMethod(self.httpMethod.rawValue)
         }
         return method
     }

@@ -401,7 +401,7 @@ Accept all the default values, except:
 QuoteService has no authentication. Is this okay? [y/N]: <-- answer Y here 
 ```
 
-This command outputs the URL of the API GAteway, for example:
+This command outputs the URL of the API Gateway, for example:
 
 ```sh
 Outputs                                                                                                                     
@@ -428,9 +428,9 @@ curl [[ Replace with SWIFTAPIEndpoint value ]]/stocks/AAPL
 
 ## Deployment costs
 
-On new AWS accounts, there is no cost associated with teh deployment and test of this sample code. It falls under the permananet AWS free Tier for [AWS Lambda](https://aws.amazon.com/lambda/pricing/) and [Amazon API Gateway](https://aws.amazon.com/lambda/pricing/)
+On new AWS accounts, there is no costs associated with the deployment and test of this sample code, up to 1 million invocation per month. It falls under the permananet AWS free Tier for [AWS Lambda](https://aws.amazon.com/lambda/pricing/) and [Amazon API Gateway](https://aws.amazon.com/api-gateway/pricing/)
 
-When you're account is older than a year, you are charged $1.0 per million calls to the API Gateway.
+When you're account is older than a year, you are charged $1.0 per million calls to the API Gateway. AWS Lambda function invocation stays free up to 4 million invocations and 400.000 GB-second compute time per month.
 
 ## Cleanup 
 

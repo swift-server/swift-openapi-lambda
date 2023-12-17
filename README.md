@@ -380,6 +380,10 @@ Resources:
         # pass through all HTTP verbs and paths
         Api:
           Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
     Metadata:
       BuildMethod: makefile
 

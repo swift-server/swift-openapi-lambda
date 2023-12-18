@@ -13,7 +13,7 @@ This library allows to expose server side Swift OpenAPI implementation generated
 
 The library provides two capabilities:
 
-- a default implementation of an AWS Lambda function in that consumes your OpenAPI service implementation
+- a default implementation of an AWS Lambda function that consumes your OpenAPI service implementation
 - a binding with the [Amazon API Gateway (HTTP API mode)](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api.html) (aka `APIGatewayV2`) event type.
 
 Other Lambda function bindings (event types) are supported as well, depending on your needs. [We include instructions](#implement-your-own-openapilambda-to-support-other-event-types) to create a binding with an [Amazon API Gateway (REST API mode)](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-rest-api.html)
@@ -121,13 +121,15 @@ swift package init --name quoteapi --type executable
 
 2. Write or import an OpenAI API definition in YAML or JSON 
 
-```yaml
+```sh
 #
 # the $ signs are escaped (\$) to work with the cat << EOF command
 # if you choose to copy the content directly to a text editor,
 # be sure to remove the \ (that means \$ becomes $)
 #
+```
 
+```yaml
 cat << EOF > Sources/openapi.yaml
 openapi: 3.1.0
 info:
@@ -296,7 +298,9 @@ swift build
 # if you choose to copy the content directly to a text editor,
 # be sure to remove the \ (that means \$ becomes $)
 #
+```
 
+```sh
 cat << EOF > Dockerfile
 # image used to compile your Swift code
 FROM public.ecr.aws/docker/library/swift:5.9.1-amazonlinux2
@@ -355,7 +359,9 @@ EOF
 # if you choose to copy the content directly to a text editor,
 # be sure to remove the \ (that means \$ becomes $)
 #
+```
 
+```sh
 cat << EOF > template.yml
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
@@ -498,7 +504,7 @@ struct QuoteServiceImpl: APIProtocol {
 
 Next, I implement a `struct` that conforms to `OpenAPILambda`. This `struct` defines:
 
--  the event input and output the Lambda function will work on (from [AWS Lambda Event Types](https://github.com/swift-server/swift-aws-lambda-events) library).
+- the event input and output the Lambda function will work on (from [AWS Lambda Event Types](https://github.com/swift-server/swift-aws-lambda-events) library).
 - the mandatory constructor `init(transport:)`
 - the executable target entrypoint (`@main`)
 
@@ -536,7 +542,7 @@ extension OpenAPILambda where Output == APIGatewayResponse {
 }
 ```
 
-To keep the above code short, simple, and readable, we suggest to implement whatever extension on the Lambda event type.  Here are the extensions required to support the above code. These are simple data transformation methods from one type to the other.
+To keep the above code short, simple, and readable, we suggest to implement whatever extension on the Lambda source Event type.  Here are the extensions required to support the above code. These are simple data transformation methods from one type to the other.
 
 ```swift
 extension APIGatewayRequest {

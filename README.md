@@ -1,5 +1,3 @@
-[![Build & Test on GitHub](https://github.com/sebsto/swift-openapi-lambda/actions/workflows/swift.yml/badge.svg)](https://github.com/sebsto/swift-openapi-lambda/actions/workflows/swift.yml)
-
 ![language](https://img.shields.io/badge/swift-5.9-blue)
 ![platform](https://img.shields.io/badge/platform-macOS-green)
 ![platform](https://img.shields.io/badge/platform-Linux-orange)

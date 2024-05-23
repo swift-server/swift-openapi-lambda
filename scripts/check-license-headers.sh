@@ -86,6 +86,7 @@ read -ra PATHS_TO_CHECK_FOR_LICENSE <<< "$( \
   ":(exclude)**/Makefile" \
   ":(exclude)**/*.html" \
   ":(exclude)**/*.gif" \
+  ":(exclude)**/*.json" \
   | xargs -0 \
 )"
 

@@ -13,3 +13,6 @@ services:
 
   shell:
     image: *image
+
+  soundness:
+    image: *image

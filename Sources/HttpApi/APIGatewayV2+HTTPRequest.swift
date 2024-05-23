@@ -18,18 +18,10 @@ import OpenAPIRuntime
 
 extension APIGatewayV2Request {
 
-    /// Return an `HTTPRequest.Method` for this `APIGatewayV2Request`
-    public func httpRequestMethod() throws -> HTTPRequest.Method {
-        guard let method = HTTPRequest.Method(rawValue: self.context.http.method.rawValue) else {
-            throw OpenAPILambdaHttpError.invalidMethod(self.context.http.method.rawValue)
-        }
-        return method
-    }
-
     /// Return an `HTTPRequest` for this `APIGatewayV2Request`
     public func httpRequest() throws -> HTTPRequest {
-        try HTTPRequest(
-            method: self.httpRequestMethod(),
+        HTTPRequest(
+            method: self.context.http.method,
             scheme: "https",
             authority: "",
             path: self.rawPath,
@@ -43,7 +35,7 @@ extension APIGatewayV2Response {
     /// Create a `APIGatewayV2Response` from an `HTTPResponse`
     public init(from response: HTTPResponse) {
         self = APIGatewayV2Response(
-            statusCode: .init(code: UInt(response.status.code)),
+            statusCode: response.status,
             headers: .init(from: response.headerFields),
             isBase64Encoded: false,
             cookies: nil

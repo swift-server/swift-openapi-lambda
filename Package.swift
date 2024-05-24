@@ -23,7 +23,8 @@ let package = Package(
                 .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-events"),
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
             ],
-            path: "Sources"
+            path: "Sources",
+            swiftSettings: [.enableExperimentalFeature("StrictConcurrency=complete")]
         ),
         // test targets
         .testTarget(name: "OpenAPILambdaTests", dependencies: [.byName(name: "OpenAPILambda")]),

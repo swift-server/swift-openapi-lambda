@@ -24,11 +24,20 @@ jobs:
 
   license:
     name: License headers check
-    needs: soundness
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
     steps:
-    - name: "License headers check"
-      run: |
-        ./scripts/check_license_headers.sh
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Mark the workspace as safe
+        # https://github.com/actions/checkout/issues/766
+        run: git config --global --add safe.directory ${GITHUB_WORKSPACE}    
+      - name: License headers check
+        run: |
+          ./scripts/check_license_headers.sh
 
   unit-tests:
     name: Unit tests

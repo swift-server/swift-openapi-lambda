@@ -1,10 +1,10 @@
-# This workflow will build a Swift project on macOS and Linux 
+# This workflow will build a Swift project on macOS and Linux
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
 name: swift-openapi-lambda-build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
     types: [opened, reopened, synchronize]
 
@@ -31,4 +31,4 @@ jobs:
 
   swift-6-language-mode:
     name: Swift 6 Language Mode
-    uses: apple/swift-nio/.github/workflows/swift_6_language_mode.yml@main      
+    uses: apple/swift-nio/.github/workflows/swift_6_language_mode.yml@main

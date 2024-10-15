@@ -21,6 +21,12 @@ jobs:
       docs_check_container_image: "swift:6.0-noble"
       format_check_container_image: "swiftlang/swift:nightly-6.0-jammy"
 
+  license:
+    name: License headers check
+    needs: soundness
+    run: |
+      ./scripts/check_license_headers.sh
+
   unit-tests:
     name: Unit tests
     uses: apple/swift-nio/.github/workflows/unit_tests.yml@main

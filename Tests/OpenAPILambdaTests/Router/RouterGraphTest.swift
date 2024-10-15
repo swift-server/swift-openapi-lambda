@@ -15,10 +15,11 @@
 import HTTPTypes
 import OpenAPIRuntime
 
-import XCTest
+import Testing
 @testable import OpenAPILambda
 
-final class RouterGraphTest: XCTestCase {
+struct RouterGraphTests {
+    @Test("Path with no parameters")
     func testPathNoParams() async throws {
         // given
         let strMethod = "GET"
@@ -29,41 +30,43 @@ final class RouterGraphTest: XCTestCase {
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
 
         // when
-        XCTAssertNoThrow(try graph.add(method: method, path: path, handler: handler))
+        #expect(throws: Never.self) { try graph.add(method: method, path: path, handler: handler) }
+
         // then
         var node: Node? = graph.root()
 
         // first node is GET
         node = node?.children[strMethod]
         if case .httpMethod(let retrievedMethod) = node?.value {
-            XCTAssert(retrievedMethod == method)
+            #expect(retrievedMethod == method)
         }
         else {
-            XCTFail("Not an HTTP method")
+            Issue.record("Not an HTTP method")
         }
         // all other nodes but last are path elements
         node = node?.children["element1"]
-        XCTAssertNotNil(node)
-        XCTAssert(node?.children.count == 1)
-        if case .pathElement(let element) = node?.value { XCTAssert(element == "element1") }
+        #expect(node != nil)
+        #expect(node?.children.count == 1)
+        if case .pathElement(let element) = node?.value { #expect(element == "element1") }
         node = node?.children["element2"]
-        XCTAssertNotNil(node)
-        XCTAssert(node?.children.count == 1)
-        if case .pathElement(let element) = node?.value { XCTAssert(element == "element2") }
+        #expect(node != nil)
+        #expect(node?.children.count == 1)
+        if case .pathElement(let element) = node?.value { #expect(element == "element2") }
 
         // last node is a handler
         node = node?.children["handler"]
         if case .handler(let retrievedHandler) = node?.value {
             let request = HTTPRequest(method: .init("GET")!, scheme: "https", authority: nil, path: "")
             let (response, body) = try await retrievedHandler(request, nil, ServerRequestMetadata())
-            XCTAssert(response.status == .ok)
+            #expect(response.status == .ok)
             let retrievedBody = try? await String(collecting: body ?? "", upTo: 10 * 1024 * 1024)
-            XCTAssert(retrievedBody == bodyString)
+            #expect(retrievedBody == bodyString)
         }
         else {
-            XCTFail("Not a handler")
+            Issue.record("Not a handler")
         }
     }
+    @Test("Path with one parameter")
     func testPathOneParams() async throws {
         // given
         let strMethod = "GET"
@@ -74,41 +77,42 @@ final class RouterGraphTest: XCTestCase {
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
 
         // when
-        XCTAssertNoThrow(try graph.add(method: method, path: path, handler: handler))
+        #expect(throws: Never.self) { try graph.add(method: method, path: path, handler: handler) }
         // then
         var node: Node? = graph.root()
 
         // first node is GET
         node = node?.children[strMethod]
         if case .httpMethod(let retrievedMethod) = node?.value {
-            XCTAssert(retrievedMethod == method)
+            #expect(retrievedMethod == method)
         }
         else {
-            XCTFail("Not an HTTP method")
+            Issue.record("Not an HTTP method")
         }
         // next node  is a  path elements
         node = node?.children["element1"]
-        XCTAssertNotNil(node)
-        XCTAssert(node?.children.count == 1)
-        if case .pathElement(let element) = node?.value { XCTAssert(element == "element1") }
+        #expect(node != nil)
+        #expect(node?.children.count == 1)
+        if case .pathElement(let element) = node?.value { #expect(element == "element1") }
         node = node?.children["param1"]
-        XCTAssertNotNil(node)
-        XCTAssert(node?.children.count == 1)
-        if case .pathParameter(let param) = node?.value { XCTAssert(param == "param1") }
+        #expect(node != nil)
+        #expect(node?.children.count == 1)
+        if case .pathParameter(let param) = node?.value { #expect(param == "param1") }
 
         // last node is a handler
         node = node?.children["handler"]
         if case .handler(let retrievedHandler) = node?.value {
             let request = HTTPRequest(method: .init("GET")!, scheme: "https", authority: nil, path: "")
             let (response, body) = try await retrievedHandler(request, nil, ServerRequestMetadata())
-            XCTAssert(response.status == .ok)
+            #expect(response.status == .ok)
             let retrievedBody = try? await String(collecting: body ?? "", upTo: 10 * 1024 * 1024)
-            XCTAssert(retrievedBody == bodyString)
+            #expect(retrievedBody == bodyString)
         }
         else {
-            XCTFail("Not a handler")
+            Issue.record("Not a handler")
         }
     }
+    @Test("Two GET paths")
     func testTwoGETPaths() async throws {
         // given
         let strMethod = "GET"
@@ -120,8 +124,8 @@ final class RouterGraphTest: XCTestCase {
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
 
         // when
-        XCTAssertNoThrow(try graph.add(method: method, path: path1, handler: handler))
-        XCTAssertNoThrow(try graph.add(method: method, path: path2, handler: handler))
+        #expect(throws: Never.self) { try graph.add(method: method, path: path1, handler: handler) }
+        #expect(throws: Never.self) { try graph.add(method: method, path: path2, handler: handler) }
 
         // then
         var node: Node? = graph.root()
@@ -129,49 +133,50 @@ final class RouterGraphTest: XCTestCase {
         // first node is GET
         node = node?.children[strMethod]
         if case .httpMethod(let retrievedMethod) = node?.value {
-            XCTAssert(retrievedMethod == method)
+            #expect(retrievedMethod == method)
         }
         else {
-            XCTFail("Not an HTTP method")
+            Issue.record("Not an HTTP method")
         }
         // next nodes are a path elements
         let node1 = node?.children["element1"]
-        XCTAssertNotNil(node1)
-        XCTAssert(node1?.children.count == 1)
-        if case .pathElement(let element) = node1?.value { XCTAssert(element == "element1") }
+        #expect(node1 != nil)
+        #expect(node1?.children.count == 1)
+        if case .pathElement(let element) = node1?.value { #expect(element == "element1") }
 
         let node2 = node?.children["element2"]
-        XCTAssertNotNil(node2)
-        XCTAssert(node2?.children.count == 1)
-        if case .pathElement(let element) = node2?.value { XCTAssert(element == "element2") }
+        #expect(node2 != nil)
+        #expect(node2?.children.count == 1)
+        if case .pathElement(let element) = node2?.value { #expect(element == "element2") }
 
         // last node is a handler
         let node3 = node1?.children["handler"]
-        XCTAssertNotNil(node3)
+        #expect(node3 != nil)
         if case .handler(let retrievedHandler) = node3?.value {
             let request = HTTPRequest(method: .init("GET")!, scheme: "https", authority: nil, path: "")
             let (response, body) = try await retrievedHandler(request, nil, ServerRequestMetadata())
-            XCTAssert(response.status == .ok)
+            #expect(response.status == .ok)
             let retrievedBody = try? await String(collecting: body ?? "", upTo: 10 * 1024 * 1024)
-            XCTAssert(retrievedBody == bodyString)
+            #expect(retrievedBody == bodyString)
         }
         else {
-            XCTFail("Not a handler")
+            Issue.record("Not a handler")
         }
 
         let node4 = node2?.children["handler"]
-        XCTAssertNotNil(node3)
+        try #require(node4 != nil)
         if case .handler(let retrievedHandler) = node4?.value {
             let request = HTTPRequest(method: .init("GET")!, scheme: "https", authority: nil, path: "")
             let (response, body) = try await retrievedHandler(request, nil, ServerRequestMetadata())
-            XCTAssert(response.status == .ok)
+            #expect(response.status == .ok)
             let retrievedBody = try? await String(collecting: body ?? "", upTo: 10 * 1024 * 1024)
-            XCTAssert(retrievedBody == bodyString)
+            #expect(retrievedBody == bodyString)
         }
         else {
-            XCTFail("Not a handler")
+            Issue.record("Not a handler")
         }
     }
+    @Test("Multiple HTTP methods")
     func testMultipleHTTPMethods() throws {
         // given
         let strMethod1 = "GET"
@@ -184,8 +189,8 @@ final class RouterGraphTest: XCTestCase {
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
 
         // when
-        XCTAssertNoThrow(try graph.add(method: method1, path: path, handler: handler))
-        XCTAssertNoThrow(try graph.add(method: method2, path: path, handler: handler))
+        #expect(throws: Never.self) { try graph.add(method: method1, path: path, handler: handler) }
+        #expect(throws: Never.self) { try graph.add(method: method2, path: path, handler: handler) }
 
         // then
         var node: Node? = graph.root()
@@ -193,29 +198,29 @@ final class RouterGraphTest: XCTestCase {
         // first node is GET
         let node1 = node?.children[strMethod1]
         if case .httpMethod(let retrievedMethod) = node1?.value {
-            XCTAssert(retrievedMethod == method1)
+            #expect(retrievedMethod == method1)
         }
         else {
-            XCTFail("Not an HTTP method")
+            Issue.record("Not an HTTP method")
         }
         // but there is also a POST node at level 1
         let node2 = node?.children[strMethod2]
         if case .httpMethod(let retrievedMethod) = node2?.value {
-            XCTAssert(retrievedMethod == method2)
+            #expect(retrievedMethod == method2)
         }
         else {
-            XCTFail("Not an HTTP method")
+            Issue.record("Not an HTTP method")
         }
 
         // all other nodes but last are path elements
         node = node1?.children["element1"]
-        XCTAssertNotNil(node1)
-        XCTAssert(node1?.children.count == 1)
-        if case .pathElement(let element) = node1?.value { XCTAssert(element == "element1") }
+        #expect(node1 != nil)
+        #expect(node1?.children.count == 1)
+        if case .pathElement(let element) = node1?.value { #expect(element == "element1") }
         node = node2?.children["element2"]
-        XCTAssertNotNil(node2)
-        XCTAssert(node2?.children.count == 1)
-        if case .pathElement(let element) = node2?.value { XCTAssert(element == "element2") }
+        #expect(node2 != nil)
+        #expect(node2?.children.count == 1)
+        if case .pathElement(let element) = node2?.value { #expect(element == "element2") }
     }
     //    func testDeepSearch() {
     //        // given
@@ -270,6 +275,7 @@ final class RouterGraphTest: XCTestCase {
     //        }
     //    }
 
+    @Test("No method path")
     func testNoMethodPath() {
         // given
         let strMethod = "GET"
@@ -279,8 +285,13 @@ final class RouterGraphTest: XCTestCase {
         // when
         // then
         let noExistingMethod = HTTPRequest.Method("POST")!
-        XCTAssertThrowsError(try graph.find(method: noExistingMethod, path: "/dummy"))
+        // #expect(throws: OpenAPILambdaRouterError.noRouteForMethod(noExistingMethod).self) {
+        #expect(throws: OpenAPILambdaRouterError.self) {
+            try graph.find(method: noExistingMethod, path: "/dummy")
+        }
     }
+
+    @Test("No two param children")
     func testNoTwoParamChilds() {
         let strMethod = "GET"
         let method = HTTPRequest.Method(strMethod)!
@@ -291,10 +302,15 @@ final class RouterGraphTest: XCTestCase {
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
 
         // when
-        XCTAssertNoThrow(try graph.add(method: method, path: path1, handler: handler))
+        #expect(throws: Never.self) { try graph.add(method: method, path: path1, handler: handler) }
+
         // then
-        XCTAssertThrowsError(try graph.add(method: method, path: path2, handler: handler))
+        #expect(throws: URIPathCollectionError.self) {
+            try graph.add(method: method, path: path2, handler: handler)
+        }
     }
+
+    @Test("Find handler 1")
     func testFindHandler1() throws {
         // given
         let strMethod = "GET"
@@ -303,11 +319,13 @@ final class RouterGraphTest: XCTestCase {
         let pathToTest = "/element1/element2"
 
         //when
-        XCTAssertNoThrow(try graph.find(method: method, path: pathToTest))
+        #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }
         let (handler, metadata) = try graph.find(method: method, path: pathToTest)
-        XCTAssert(metadata.count == 0)
-        XCTAssertNotNil(handler)
+        #expect(metadata.count == 0)
+        #expect(handler != nil)
     }
+
+    @Test("Find handler 2")
     func testFindHandler2() throws {
         // given
         let strMethod = "GET"
@@ -316,12 +334,13 @@ final class RouterGraphTest: XCTestCase {
         let pathToTest = "/element3/value1/element4"
 
         //when
-        XCTAssertNoThrow(try graph.find(method: method, path: pathToTest))
+        #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }
         let (handler, metadata) = try graph.find(method: method, path: pathToTest)
-        XCTAssert(metadata.count == 1)
-        XCTAssertNotNil(handler)
+        #expect(metadata.count == 1)
+        #expect(handler != nil)
     }
 
+    @Test("Find handler 3")
     func testFindHandler3() throws {
         // given
         let strMethod = "GET"
@@ -330,12 +349,13 @@ final class RouterGraphTest: XCTestCase {
         let pathToTest = "/element5/value1"
 
         //when
-        XCTAssertNoThrow(try graph.find(method: method, path: pathToTest))
+        #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }
         let (handler, metadata) = try graph.find(method: method, path: pathToTest)
-        XCTAssert(metadata.count == 1)
-        XCTAssertNotNil(handler)
+        #expect(metadata.count == 1)
+        #expect(handler != nil)
     }
 
+    @Test("Find handler error 1")
     func testFindHandlerError1() throws {
         // given
         let strMethod = "GET"
@@ -344,9 +364,12 @@ final class RouterGraphTest: XCTestCase {
         let pathToTest = "/element6/value1"
 
         //when
-        XCTAssertThrowsError(try graph.find(method: method, path: pathToTest))
+        #expect(throws: OpenAPILambdaRouterError.self) {
+            try graph.find(method: method, path: pathToTest)
+        }
     }
 
+    @Test("Find handler error 2")
     func testFindHandlerError2() throws {
         // given
         let strMethod = "GET"
@@ -355,9 +378,12 @@ final class RouterGraphTest: XCTestCase {
         let pathToTest = "/element6"
 
         //when
-        XCTAssertThrowsError(try graph.find(method: method, path: pathToTest))
+        #expect(throws: OpenAPILambdaRouterError.self) {
+            try graph.find(method: method, path: pathToTest)
+        }
     }
 
+    @Test("Find handler error no HTTP method")
     func testFindHandlerErrorNoHttpMethod() throws {
         // given
         let strMethod = "GET"
@@ -366,7 +392,9 @@ final class RouterGraphTest: XCTestCase {
         let pathToTest = "/element1/element2"
 
         //when
-        XCTAssertThrowsError(try graph.find(method: HTTPRequest.Method(rawValue: "POST")!, path: pathToTest))
+        #expect(throws: OpenAPILambdaRouterError.self) {
+            try graph.find(method: HTTPRequest.Method(rawValue: "POST")!, path: pathToTest)
+        }
     }
 
     private func prepareGraph(for method: HTTPRequest.Method) -> URIPath {
@@ -376,8 +404,8 @@ final class RouterGraphTest: XCTestCase {
         let bodyString = "bodyString"
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
 
-        XCTAssertNoThrow(try graph.add(method: method, path: path1, handler: handler))
-        XCTAssertNoThrow(try graph.add(method: method, path: path2, handler: handler))
+        try! graph.add(method: method, path: path1, handler: handler)
+        try! graph.add(method: method, path: path2, handler: handler)
         return graph
     }
 
@@ -389,9 +417,9 @@ final class RouterGraphTest: XCTestCase {
         let bodyString = "bodyString"
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
 
-        XCTAssertNoThrow(try graph.add(method: method, path: path1, handler: handler))
-        XCTAssertNoThrow(try graph.add(method: method, path: path2, handler: handler))
-        XCTAssertNoThrow(try graph.add(method: method, path: path3, handler: handler))
+        try! graph.add(method: method, path: path1, handler: handler)
+        try! graph.add(method: method, path: path2, handler: handler)
+        try! graph.add(method: method, path: path3, handler: handler)
 
         return graph
     }

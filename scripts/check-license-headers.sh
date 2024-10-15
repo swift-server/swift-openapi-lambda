@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 ##===----------------------------------------------------------------------===##
 ##
 ## This source file is part of the Swift OpenAPI Lambda open source project
@@ -14,19 +14,17 @@
 ##
 ##===----------------------------------------------------------------------===##
 
-##===----------------------------------------------------------------------===##
-##
-## This source file is part of the SwiftOpenAPIGenerator open source project
-##
-## Copyright (c) 2023 Apple Inc. and the SwiftOpenAPIGenerator project authors
-## Licensed under Apache License v2.0
-##
-## See LICENSE.txt for license information
-## See CONTRIBUTORS.txt for the list of SwiftOpenAPIGenerator project authors
-##
-## SPDX-License-Identifier: Apache-2.0
-##
-##===----------------------------------------------------------------------===##
+# ===----------------------------------------------------------------------===//
+#
+# This source file is part of the Swift.org open source project
+#
+# Copyright (c) 2024 Apple Inc. and the Swift project authors
+# Licensed under Apache License v2.0 with Runtime Library Exception
+#
+# See https://swift.org/LICENSE.txt for license information
+# See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+#
+# ===----------------------------------------------------------------------===//
 
 set -euo pipefail
 
@@ -34,90 +32,68 @@ log() { printf -- "** %s\n" "$*" >&2; }
 error() { printf -- "** ERROR: %s\n" "$*" >&2; }
 fatal() { error "$@"; exit 1; }
 
-CURRENT_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-REPO_ROOT="$(git -C "${CURRENT_SCRIPT_DIR}" rev-parse --show-toplevel)"
+test -n "${PROJECT_NAME:-}" || fatal "PROJECT_NAME unset"
 
-EXPECTED_FILE_HEADER_TEMPLATE="@@===----------------------------------------------------------------------===@@
+expected_file_header_template="@@===----------------------------------------------------------------------===@@
 @@
-@@ This source file is part of the Swift OpenAPI Lambda open source project
+@@ This source file is part of the ${PROJECT_NAME} open source project
 @@
 @@ Copyright (c) YEARS Amazon.com, Inc. or its affiliates
-@@                    and the Swift OpenAPI Lambda project authors
+@@                    and the ${PROJECT_NAME} project authors
 @@ Licensed under Apache License v2.0
 @@
 @@ See LICENSE.txt for license information
-@@ See CONTRIBUTORS.txt for the list of Swift OpenAPI Lambda project authors
+@@ See CONTRIBUTORS.txt for the list of ${PROJECT_NAME} project authors
 @@
 @@ SPDX-License-Identifier: Apache-2.0
 @@
 @@===----------------------------------------------------------------------===@@"
 
-PATHS_WITH_MISSING_LICENSE=( )
+paths_with_missing_license=( )
 
-read -ra PATHS_TO_CHECK_FOR_LICENSE <<< "$( \
-  git -C "${REPO_ROOT}" ls-files -z \
-  ":(exclude).gitignore" \
-  ":(exclude).spi.yml" \
-  ":(exclude).swift-format" \
-  ":(exclude).github/*" \
-  ":(exclude)CODE_OF_CONDUCT.md" \
-  ":(exclude)CONTRIBUTING.md" \
-  ":(exclude)CONTRIBUTORS.txt" \
-  ":(exclude)LICENSE.txt" \
-  ":(exclude)NOTICE.txt" \
-  ":(exclude)Package.swift" \
-  ":(exclude)Package.resolved" \
-  ":(exclude)README.md" \
-  ":(exclude)SECURITY.md" \
-  ":(exclude)scripts/unacceptable-language.txt" \
-  ":(exclude)docker/*" \
-  ":(exclude)**/*.docc/*" \
-  ":(exclude)**/.gitignore" \
-  ":(exclude)**/Package.swift" \
-  ":(exclude)**/Package.resolved" \
-  ":(exclude)**/README.md" \
-  ":(exclude)**/openapi.yaml" \
-  ":(exclude)**/openapi.yml" \
-  ":(exclude)**/openapi-generator-config.yaml" \
-  ":(exclude)**/openapi-generator-config.yml" \
-  ":(exclude)**/docker-compose.yaml" \
-  ":(exclude)**/docker/*" \
-  ":(exclude)**/.dockerignore" \
-  ":(exclude)**/Makefile" \
-  ":(exclude)**/*.html" \
-  ":(exclude)**/*.gif" \
-  ":(exclude)**/*.json" \
-  | xargs -0 \
-)"
+file_paths=$(tr '\n' '\0' < .licenseignore | xargs -0 -I% printf '":(exclude)%" '| xargs git ls-files)
 
-for FILE_PATH in "${PATHS_TO_CHECK_FOR_LICENSE[@]}"; do
-  FILE_BASENAME=$(basename -- "${FILE_PATH}")
-  FILE_EXTENSION="${FILE_BASENAME##*.}"
+while IFS= read -r file_path; do
+  file_basename=$(basename -- "${file_path}")
+  file_extension="${file_basename##*.}"
 
-  case "${FILE_EXTENSION}" in
-    swift) EXPECTED_FILE_HEADER=$(sed -e 's|@@|//|g' <<<"${EXPECTED_FILE_HEADER_TEMPLATE}") ;;
-    yml) EXPECTED_FILE_HEADER=$(sed -e 's|@@|##|g' <<<"${EXPECTED_FILE_HEADER_TEMPLATE}") ;;
-    sh) EXPECTED_FILE_HEADER=$(cat <(echo '#!/usr/bin/env bash') <(sed -e 's|@@|##|g' <<<"${EXPECTED_FILE_HEADER_TEMPLATE}")) ;;
-    *) fatal "Unsupported file extension for file (exclude or update this script): ${FILE_PATH}" ;;
+  # shellcheck disable=SC2001 # We prefer to use sed here instead of bash search/replace
+  case "${file_extension}" in
+    swift) expected_file_header=$(sed -e 's|@@|//|g' <<<"${expected_file_header_template}") ;;
+    h) expected_file_header=$(sed -e 's|@@|//|g' <<<"${expected_file_header_template}") ;;
+    c) expected_file_header=$(sed -e 's|@@|//|g' <<<"${expected_file_header_template}") ;;
+    sh) expected_file_header=$(cat <(echo '#!/bin/bash') <(sed -e 's|@@|##|g' <<<"${expected_file_header_template}")) ;;
+    kts) expected_file_header=$(sed -e 's|@@|//|g' <<<"${expected_file_header_template}") ;;
+    gradle) expected_file_header=$(sed -e 's|@@|//|g' <<<"${expected_file_header_template}") ;;
+    groovy) expected_file_header=$(sed -e 's|@@|//|g' <<<"${expected_file_header_template}") ;;
+    java) expected_file_header=$(sed -e 's|@@|//|g' <<<"${expected_file_header_template}") ;;
+    py) expected_file_header=$(cat <(echo '#!/usr/bin/env python3') <(sed -e 's|@@|##|g' <<<"${expected_file_header_template}")) ;;
+    rb) expected_file_header=$(cat <(echo '#!/usr/bin/env ruby') <(sed -e 's|@@|##|g' <<<"${expected_file_header_template}")) ;;
+    in) expected_file_header=$(sed -e 's|@@|##|g' <<<"${expected_file_header_template}") ;;
+    cmake) expected_file_header=$(sed -e 's|@@|##|g' <<<"${expected_file_header_template}") ;;
+    *)
+      error "Unsupported file extension ${file_extension} for file (exclude or update this script): ${file_path}"
+      paths_with_missing_license+=("${file_path} ")
+      ;;
   esac
-  EXPECTED_FILE_HEADER_LINECOUNT=$(wc -l <<<"${EXPECTED_FILE_HEADER}")
+  expected_file_header_linecount=$(wc -l <<<"${expected_file_header}")
 
-  FILE_HEADER=$(head -n "${EXPECTED_FILE_HEADER_LINECOUNT}" "${FILE_PATH}")
-  NORMALIZED_FILE_HEADER=$(
-    echo "${FILE_HEADER}" \
-    | sed -e 's/202[3]-202[3]/YEARS/' -e 's/202[3]/YEARS/' \
+  file_header=$(head -n "${expected_file_header_linecount}" "${file_path}")
+  normalized_file_header=$(
+    echo "${file_header}" \
+    | sed -e 's/20[12][0123456789]-20[12][0123456789]/YEARS/' -e 's/20[12][0123456789]/YEARS/' \
   )
 
   if ! diff -u \
-    --label "Expected header" <(echo "${EXPECTED_FILE_HEADER}") \
-    --label "${FILE_PATH}" <(echo "${NORMALIZED_FILE_HEADER}")
+    --label "Expected header" <(echo "${expected_file_header}") \
+    --label "${file_path}" <(echo "${normalized_file_header}")
   then
-    PATHS_WITH_MISSING_LICENSE+=("${FILE_PATH} ")
+    paths_with_missing_license+=("${file_path} ")
   fi
-done
+done <<< "$file_paths"
 
-if [ "${#PATHS_WITH_MISSING_LICENSE[@]}" -gt 0 ]; then
-  fatal "❌ Found missing license header in files: ${PATHS_WITH_MISSING_LICENSE[*]}."
+if [ "${#paths_with_missing_license[@]}" -gt 0 ]; then
+  fatal "❌ Found missing license header in files: ${paths_with_missing_license[*]}."
 fi
 
 log "✅ Found no files with missing license header."

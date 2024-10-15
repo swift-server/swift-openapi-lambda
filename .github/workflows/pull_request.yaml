@@ -34,10 +34,10 @@ jobs:
           persist-credentials: false
       - name: Mark the workspace as safe
         # https://github.com/actions/checkout/issues/766
-        run: git config --global --add safe.directory ${GITHUB_WORKSPACE}    
+        run: git config --global --add safe.directory ${GITHUB_WORKSPACE}
       - name: License headers check
         run: |
-          ./scripts/check_license_headers.sh
+          ./scripts/check-license-headers.sh
 
   unit-tests:
     name: Unit tests

@@ -15,6 +15,7 @@
 import HTTPTypes
 import OpenAPIRuntime
 
+#if swift(>=6.0)
 import Testing
 @testable import OpenAPILambda
 
@@ -425,3 +426,4 @@ struct RouterGraphTests {
     }
 
 }
+#endif

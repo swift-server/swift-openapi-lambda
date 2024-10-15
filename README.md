@@ -1,4 +1,9 @@
+[![Build & Test on GitHub](https://github.com/swift-server/swift-openapi-lambda/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/swift-server/swift-openapi-lambda/actions/workflows//pull_request.yaml)
+
+
 ![language](https://img.shields.io/badge/swift-5.9-blue)
+![language](https://img.shields.io/badge/swift-5.10-blue)
+![language](https://img.shields.io/badge/swift-6.0-blue)
 ![platform](https://img.shields.io/badge/platform-macOS-green)
 ![platform](https://img.shields.io/badge/platform-Linux-orange)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)

@@ -17,6 +17,7 @@ import OpenAPIRuntime
 
 @testable import OpenAPILambda
 
+// only run unit tests on Swift 6.x
 #if swift(>=6.0)
 import Testing
 

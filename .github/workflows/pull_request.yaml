@@ -36,6 +36,8 @@ jobs:
         # https://github.com/actions/checkout/issues/766
         run: git config --global --add safe.directory ${GITHUB_WORKSPACE}
       - name: License headers check
+        env:
+          PROJECT_NAME: "Swift OpenAPI Lambda" 
         run: |
           ./scripts/check-license-headers.sh
 

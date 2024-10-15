@@ -30,7 +30,7 @@ let package = Package(
         .testTarget(
             name: "OpenAPILambdaTests",
             dependencies: [
-                .byName(name: "OpenAPILambda"),
+                .byName(name: "OpenAPILambda")
             ]
         ),
     ]

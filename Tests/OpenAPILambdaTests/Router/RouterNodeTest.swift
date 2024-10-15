@@ -15,128 +15,150 @@
 import HTTPTypes
 import OpenAPIRuntime
 
-import XCTest
 @testable import OpenAPILambda
 
-final class RouterNodeTest: XCTestCase {
+// only run unit tests on Swift 6.x
+#if swift(>=6.0)
+import Testing
+
+struct RouterNodeTests {
+    @Test("First node is root")
     func testFirstNodeIsRoot() throws {
         // given
         let node = Node()
         // when
         guard case .root = node.value else {
-            XCTFail("Top level node is not root")
+            Issue.record("Top level node is not root")
             return
         }
         // then
         // succeed
     }
+
+    @Test("Add path element")
     func testAddPathElement() throws {
         // given
         let pathElement = "test"
         let node = Node()
         // when
-        XCTAssertNoThrow(try node.add(pathElement: pathElement))
+        #expect(throws: Never.self) { try node.add(pathElement: pathElement) }
         // then
-        XCTAssert(node.children.count == 1)
+        #expect(node.children.count == 1)
         let child = node.children[pathElement]
         if case .pathElement(let element) = child?.value {
-            XCTAssert(element == pathElement)
+            #expect(element == pathElement)
         }
         else {
-            XCTFail("Not a path element")
+            Issue.record("Not a path element")
         }
     }
+
+    @Test("Add HTTP method")
     func testAddHTTPMethod() throws {
         // given
         let methodStr = "GET"
         let method = HTTPRequest.Method(methodStr)!
         let node = Node()
         // when
-        XCTAssertNoThrow(try node.add(httpMethod: method))
+        #expect(throws: Never.self) { try node.add(httpMethod: method) }
         // then
-        XCTAssert(node.children.count == 1)
+        #expect(node.children.count == 1)
         let child = node.children[methodStr]
         if case .httpMethod(let retrievedMethod) = child?.value {
-            XCTAssert(retrievedMethod == method)
+            #expect(retrievedMethod == method)
         }
         else {
-            XCTFail("Not an HTTP method")
+            Issue.record("Not an HTTP method")
         }
     }
+
+    @Test("Add parameter")
     func testAddParameter() throws {
         // given
         let parameter = "parameter"
         let node = Node()
         // when
-        XCTAssertNoThrow(try node.add(parameter: "parameter"))
+        #expect(throws: Never.self) { try node.add(parameter: "parameter") }
         // then
-        XCTAssert(node.children.count == 1)
+        #expect(node.children.count == 1)
         let child = node.children[parameter]
         if case .pathParameter(let param) = child?.value {
-            XCTAssert(param == parameter)
+            #expect(param == parameter)
         }
         else {
-            XCTFail("Not a parameter")
+            Issue.record("Not a parameter")
         }
     }
+
+    @Test("Add handler")
     func testAddHandler() async throws {
         // given
         let bodyString = "bodyString"
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
         let node = Node()
         // when
-        XCTAssertNoThrow(try node.add(handler: handler))
+        #expect(throws: Never.self) { try node.add(handler: handler) }
         // then
-        XCTAssert(node.children.count == 1)
+        #expect(node.children.count == 1)
         let child = node.children["handler"]
         if case .handler(let retrievedHandler) = child?.value {
             let request = HTTPRequest(method: .init("GET")!, scheme: "https", authority: nil, path: "")
             let (response, body) = try await retrievedHandler(request, nil, ServerRequestMetadata())
-            XCTAssert(response.status == .ok)
+            #expect(response.status == .ok)
             let retrievedBody = try? await String(collecting: body ?? "", upTo: 10 * 1024 * 1024)
-            XCTAssert(retrievedBody == bodyString)
+            #expect(retrievedBody == bodyString)
         }
         else {
-            XCTFail("Not a handler")
+            Issue.record("Not a handler")
         }
     }
+
+    @Test("Cannot add node to handler")
     func testCanNotAddNodeToHandler() {
         // given
         let bodyString = "bodyString"
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
         let node = Node()
-        XCTAssertNoThrow(try node.add(handler: handler))
+        let _ = try? node.add(handler: handler)
         // when
         let child = node.children["handler"]
         // should throw an error
-        XCTAssertThrowsError(try child?.add(pathElement: "test"))
+        #expect(throws: URIPathCollectionError.self) {
+            try child?.add(pathElement: "test")
+        }
     }
+
+    @Test("Add duplicate node")
     func testAddDuplicateNode() throws {
         // given
         let pathElement = "test"
         let node = Node()
         // when
-        XCTAssertNoThrow(try node.add(pathElement: pathElement))
-        XCTAssertNoThrow(try node.add(pathElement: pathElement))
+        #expect(throws: Never.self) { try node.add(pathElement: pathElement) }
+        #expect(throws: Never.self) { try node.add(pathElement: pathElement) }
         // then
-        XCTAssert(node.children.count == 1)
+        #expect(node.children.count == 1)
     }
+
+    @Test("Returns new node")
     func testReturnsNewNode() throws {
         // given
         let pathElement = "test"
         let node = Node()
         // when
         let newNode = try? node.add(pathElement: pathElement)
-        XCTAssertNotNil(newNode)
+        #expect(newNode != nil)
         // then
-        XCTAssert(node.children.count == 1)
+        #expect(node.children.count == 1)
         if case .pathElement(let element) = newNode?.value {
-            XCTAssert(element == pathElement)
+            #expect(element == pathElement)
         }
         else {
-            XCTFail("Not a path element")
+            Issue.record("Not a path element")
         }
     }
+
+    @Test("Returns existing child")
     func testReturnsExistingChild() throws {
         // given
         let pathElement = "test"
@@ -144,18 +166,20 @@ final class RouterNodeTest: XCTestCase {
         // when
         let _ = try? node.add(pathElement: pathElement)
         let existingNode = try? node.add(pathElement: pathElement)
-        XCTAssertNotNil(existingNode)
+        #expect(existingNode != nil)
 
         // then
-        XCTAssert(node.children.count == 1)
-        XCTAssert(existingNode?.children.count == 0)
+        #expect(node.children.count == 1)
+        #expect(existingNode?.children.count == 0)
         if case .pathElement(let element) = existingNode?.value {
-            XCTAssert(element == pathElement)
+            #expect(element == pathElement)
         }
         else {
-            XCTFail("Not a path element")
+            Issue.record("Not a path element")
         }
     }
+
+    @Test("Retrieve param child exists")
     func testRetrieveParamChildExist() {
         // given
         let pathElement = "element1"
@@ -163,14 +187,15 @@ final class RouterNodeTest: XCTestCase {
 
         // when
         let pathNode = try? root.add(pathElement: pathElement)
-        XCTAssertNotNil(pathNode)
+        #expect(pathNode != nil)
         let _ = try? pathNode?.add(parameter: "param1")
 
         // then
         let paramNode = pathNode!.parameterChild()
-        XCTAssertNotNil(paramNode)
-
+        #expect(paramNode != nil)
     }
+
+    @Test("Retrieve param child does not exist")
     func testRetrieveParamChildNOTExist() {
         // given
         let pathElement = "element1"
@@ -178,12 +203,13 @@ final class RouterNodeTest: XCTestCase {
 
         // when
         let pathNode = try? root.add(pathElement: pathElement)
-        XCTAssertNotNil(pathNode)
+        #expect(pathNode != nil)
         let _ = try? pathNode?.add(pathElement: "element2")
 
         // then
         let paramNode = pathNode!.parameterChild()
-        XCTAssertNil(paramNode)
+        #expect(paramNode == nil)
     }
 
 }
+#endif

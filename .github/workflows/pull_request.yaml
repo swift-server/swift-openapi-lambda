@@ -1,0 +1,32 @@
+# This workflow will build a Swift project on macOS and Linux 
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
+name: swift-openapi-lambda-build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  build-macos:
+    env:
+      # https://github.com/actions/runner-images/tree/main/images/macos
+      DEVELOPER_DIR: /Applications/Xcode_16.app/Contents/Developer
+      
+    runs-on: macos-15-arm64
+    # runs-on: macos-15
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: swift build -v
+    - name: Run tests
+      run: swift test -v
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: swift build -v
+    - name: Run tests
+      run: swift test -v

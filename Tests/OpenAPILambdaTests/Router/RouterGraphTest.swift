@@ -15,9 +15,10 @@
 import HTTPTypes
 import OpenAPIRuntime
 
+@testable import OpenAPILambda
+
 #if swift(>=6.0)
 import Testing
-@testable import OpenAPILambda
 
 struct RouterGraphTests {
     @Test("Path with no parameters")

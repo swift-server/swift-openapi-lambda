@@ -14,7 +14,6 @@ let package = Package(
         .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "1.0.0-alpha.3"),
         .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", from: "0.3.0"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
-        // .package(url: "https://github.com/apple/swift-testing.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -31,8 +30,7 @@ let package = Package(
         .testTarget(
             name: "OpenAPILambdaTests",
             dependencies: [
-                .byName(name: "OpenAPILambda"),
-                // .product(name: "Testing", package: "swift-testing"),
+                .byName(name: "OpenAPILambda")
             ]
         ),
     ]

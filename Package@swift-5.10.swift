@@ -5,9 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "swift-openapi-lambda",
-    platforms: [
-        .macOS(.v12), .iOS(.v15), .tvOS(.v15), .watchOS(.v8),
-    ],
+    platforms: [.macOS(.v12)],
     products: [.library(name: "OpenAPILambda", targets: ["OpenAPILambda"])],
     dependencies: [
         .package(url: "https://github.com/apple/swift-openapi-runtime.git", from: "1.0.0"),

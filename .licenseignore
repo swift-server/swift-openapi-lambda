@@ -1,5 +1,4 @@
 .gitignore
-.licenseignore
 .swiftformatignore
 .spi.yml
 .swift-format

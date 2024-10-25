@@ -101,7 +101,7 @@ struct URIPath: URIPathCollection {
         }
 
         // search for each path component.  If a component is not found, it might be a parameter
-        let pathComponents = path.split(separator: "/")
+        let pathComponents = path.prefix(while: { $0 != "?" }).split(separator: "/")
         var currentNode = nodeHTTP
         for component in pathComponents {
             if let child = currentNode.child(with: component) {

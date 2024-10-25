@@ -323,18 +323,26 @@ struct RouterGraphTests {
 
         //when
         #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }
-        let (handler, metadata) = try graph.find(method: method, path: pathToTest)
+        let (handler, metadata) = try graph.find(method: method, path: pathToTest )
         #expect(metadata.count == 0)
         #expect(handler != nil)
     }
 
-    @Test("Find handler 2")
-    func testFindHandler2() throws {
+    @Test(
+        "Find handler 2",
+        arguments: [
+            "/element3/value1/element4",
+            "/element3/value2/element4",
+            "/element3/value1/element4?param1=value1"
+        ]
+    )
+    func testFindHandler2(
+        pathToTest: String
+    ) throws {
         // given
         let strMethod = "GET"
         let method = HTTPRequest.Method(strMethod)!
         let graph = prepareGraphForFind(for: method)
-        let pathToTest = "/element3/value1/element4"
 
         //when
         #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }

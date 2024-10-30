@@ -18,13 +18,18 @@ import OpenAPIRuntime
 
 extension APIGatewayV2Request {
 
+    // OpenAPIGenerator expects the path to include the query string
+    var pathWithQueryString: String {
+        rawPath + (rawQueryString.isEmpty ? "" : "?\(rawQueryString)")
+    }
+
     /// Return an `HTTPRequest` for this `APIGatewayV2Request`
     public func httpRequest() throws -> HTTPRequest {
         HTTPRequest(
             method: self.context.http.method,
             scheme: "https",
             authority: "",
-            path: self.rawPath,
+            path: pathWithQueryString,
             headerFields: self.headers.httpFields()
         )
     }

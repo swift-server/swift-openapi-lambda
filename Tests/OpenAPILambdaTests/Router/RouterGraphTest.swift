@@ -323,7 +323,7 @@ struct RouterGraphTests {
 
         //when
         #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }
-        let (handler, metadata) = try graph.find(method: method, path: pathToTest )
+        let (handler, metadata) = try graph.find(method: method, path: pathToTest)
         #expect(metadata.count == 0)
         #expect(handler != nil)
     }
@@ -333,7 +333,7 @@ struct RouterGraphTests {
         arguments: [
             "/element3/value1/element4",
             "/element3/value2/element4",
-            "/element3/value1/element4?param1=value1"
+            "/element3/value1/element4?param1=value1",
         ]
     )
     func testFindHandler2(
@@ -345,10 +345,14 @@ struct RouterGraphTests {
         let graph = prepareGraphForFind(for: method)
 
         //when
-        #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }
-        let (handler, metadata) = try graph.find(method: method, path: pathToTest)
-        #expect(metadata.count == 1)
-        #expect(handler != nil)
+        #expect(throws: Never.self) {
+            let (handler, metadata) = try graph.find(method: method, path: pathToTest)
+
+            // then (we can not test if the query string param have been decoded, that's the job of the openapi runtime.)
+            #expect(metadata.count == 1)
+            #expect(handler != nil)
+        }
+
     }
 
     @Test("Find handler 3")

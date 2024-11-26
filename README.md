@@ -1,4 +1,4 @@
-[![Build & Test on GitHub](https://github.com/swift-server/swift-openapi-lambda/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/swift-server/swift-openapi-lambda/actions/workflows//pull_request.yaml)
+[![Build & Test on GitHub](https://github.com/swift-server/swift-openapi-lambda/actions/workflows/pull_request.yml/badge.svg)](https://github.com/swift-server/swift-openapi-lambda/actions/workflows//pull_request.yml)
 
 
 ![language](https://img.shields.io/badge/swift-5.9-blue)

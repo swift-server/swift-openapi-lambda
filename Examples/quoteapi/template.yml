@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Template for QuoteService
+
+Globals:
+  Function:
+    Timeout: 60
+    CodeUri: .
+    Handler: swift.bootstrap
+    Runtime: provided.al2
+    MemorySize: 512
+    Architectures:
+      - arm64
+
+Resources:
+  # Lambda function
+  QuoteService:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          # by default, AWS Lambda runtime produces no log
+          # use `LOG_LEVEL: debug` for for lifecycle and event handling information
+          # use `LOG_LEVEL: trace` for detailed input event information
+          LOG_LEVEL: trace
+                
+      Events:
+        # pass through all HTTP verbs and paths
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref MyProtectedApi
+            Path: /{proxy+}
+            Method: ANY
+            Auth:
+              Authorizer: MyLambdaAuthorizer
+
+    Metadata:
+      BuildMethod: makefile
+
+  MyProtectedApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Auth:
+        DefaultAuthorizer: MyLambdaAuthorizer
+        Authorizers:
+          MyLambdaAuthorizer:
+            AuthorizerPayloadFormatVersion: 2.0
+            EnableFunctionDefaultPermissions: true
+            EnableSimpleResponses: true
+            FunctionArn: arn:aws:lambda:us-east-1:486652066693:function:LambdaAuthorizer-LambdaAuthorizer-TSH4AsHiqICi
+            Identity:
+              Headers:
+                - Authorization 
+
+# print API endpoint
+Outputs:
+  SwiftAPIEndpoint:
+    Description: "API Gateway endpoint URL for your application"
+    Value: !Sub "https://${MyProtectedApi}.execute-api.${AWS::Region}.amazonaws.com"
+    # Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"

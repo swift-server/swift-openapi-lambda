@@ -14,12 +14,9 @@
 //===----------------------------------------------------------------------===//
 import HTTPTypes
 import OpenAPIRuntime
+import Testing
 
 @testable import OpenAPILambda
-
-// only run unit tests on Swift 6.x
-#if swift(>=6.0)
-import Testing
 
 struct RouterNodeTests {
     @Test("First node is root")
@@ -114,7 +111,7 @@ struct RouterNodeTests {
     }
 
     @Test("Cannot add node to handler")
-    func testCanNotAddNodeToHandler() {
+    func testCanNotAddNodeToHandler() async {
         // given
         let bodyString = "bodyString"
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
@@ -180,7 +177,7 @@ struct RouterNodeTests {
     }
 
     @Test("Retrieve param child exists")
-    func testRetrieveParamChildExist() {
+    func testRetrieveParamChildExist() async {
         // given
         let pathElement = "element1"
         let root = Node()
@@ -196,7 +193,7 @@ struct RouterNodeTests {
     }
 
     @Test("Retrieve param child does not exist")
-    func testRetrieveParamChildNOTExist() {
+    func testRetrieveParamChildNOTExist() async {
         // given
         let pathElement = "element1"
         let root = Node()
@@ -212,4 +209,3 @@ struct RouterNodeTests {
     }
 
 }
-#endif

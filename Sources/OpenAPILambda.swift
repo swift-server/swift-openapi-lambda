@@ -19,10 +19,10 @@ import OpenAPIRuntime
 import HTTPTypes
 
 /// A Lambda function implemented with a OpenAPI server (implementing `APIProtocol` from Swift OpenAPIRuntime)
-public protocol OpenAPILambda {
+public protocol OpenAPILambda: Sendable {
 
-    associatedtype Event: Decodable
-    associatedtype Output: Encodable
+    associatedtype Event: Decodable, Sendable
+    associatedtype Output: Encodable, Sendable
 
     /// Initialize application.
     ///
@@ -51,27 +51,8 @@ extension OpenAPILambda {
     /// when one is given.
     /// - Parameter logger: The logger to use for Lambda runtime logging
     public static func run(logger: Logger? = nil) async throws {
-
         let _logger = logger ?? Logger(label: "OpenAPILambda")
-        #if swift(>=6.2)
-        let box = UnsafeTransferBox(value: try Self.handler())
-        let lambdaRuntime = LambdaRuntime(logger: _logger, body: box.value)
-        #else
-        let lambdaHandler = try Self.handler()
-        let lambdaRuntime = LambdaRuntime(logger: _logger, body: lambdaHandler)
-        #endif
+        let lambdaRuntime = LambdaRuntime(logger: _logger, body: try Self.handler())
         try await lambdaRuntime.run()
     }
 }
-
-// on Swift 6.2, with approachable concurrency, the compiler considers
-// the `lambdaHandler` can not be sent to the `LambdaRuntime(body:)` directly
-// despite the fact `lambdaHandler` is not used after the call.
-// There are two workarounds:
-// - make `OpenAPILambda` conform to `Sendable`. But this would require users to ensure their implementations are also `Sendable`
-// - wrap the handler in a `UnsafeTransferBox`
-#if swift(>=6.2)
-private struct UnsafeTransferBox<Value>: @unchecked Sendable {
-    let value: Value
-}
-#endif

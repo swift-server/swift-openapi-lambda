@@ -64,6 +64,11 @@ When a Lambda function is invoked, API Gateway sends an event to the function wi
 sam local invoke QuoteService --event events/GetQuote.json
 ```
 
+On macOS, you might need to run this command if `sam` doesn't see `docker`:
+```bash
+export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
+```
+
 ## Cleanup
 
 When finished with your application, use SAM to delete it from your AWS account. Answer **Yes (y)** to all prompts. This will delete all of the application resources created in your AWS account.

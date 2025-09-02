@@ -228,7 +228,7 @@ struct RouterGraphTests {
     //        let method = HTTPRequest.Method(strMethod)!
     //        let graph = prepareGraph(for: method)
     //
-    //        let root: node? = graph.root()
+    //        let root: Node? = graph.root()
     //        XCTAssertNotNil(root)
     //
     //        // when
@@ -334,7 +334,7 @@ struct RouterGraphTests {
     )
     func testFindHandler2(
         pathToTest: String
-    ) async throws {
+    ) throws {
         // given
         let strMethod = "GET"
         let method = HTTPRequest.Method(strMethod)!

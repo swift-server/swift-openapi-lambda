@@ -1,7 +1,8 @@
-/.aws-sam
-/.build
-/.swiftpm
-/.vscode
+.aws-sam
+.build
+.index-build
+.swiftpm
+.vscode
 Package.resolved
 samconfig.toml
 *.d

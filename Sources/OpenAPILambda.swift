@@ -66,15 +66,12 @@ extension OpenAPILambda {
 
 // on Swift 6.2, with approachable concurrency, the compiler considers
 // the `lambdaHandler` can not be sent to the `LambdaRuntime(body:)` directly
-// despite the fact `lambdaHandler` is not used after that
+// despite the fact `lambdaHandler` is not used after the call.
 // There are two workarounds:
 // - make `OpenAPILambda` conform to `Sendable`. But this would require users to ensure their implementations are also `Sendable`
 // - wrap the handler in a `UnsafeTransferBox`
 #if swift(>=6.2)
-fileprivate struct UnsafeTransferBox<Value>: @unchecked Sendable {
+private struct UnsafeTransferBox<Value>: @unchecked Sendable {
     let value: Value
-    init(value: Value) {
-        self.value = value
-    }
 }
 #endif

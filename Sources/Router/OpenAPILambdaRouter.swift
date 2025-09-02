@@ -24,12 +24,12 @@ public enum OpenAPILambdaRouterError: Error {
 }
 
 /// A router API
-public protocol OpenAPILambdaRouter {
+protocol OpenAPILambdaRouter {
     /// add a route for a given HTTP method and path and associate a handler
     func add(method: HTTPRequest.Method, path: String, handler: @escaping OpenAPIHandler) throws
 
     /// Retrieve the handler and path parameter for a given HTTP method and path
-    func route(method: HTTPRequest.Method, path: String) async throws -> (
+    func route(method: HTTPRequest.Method, path: String) throws -> (
         OpenAPIHandler, OpenAPILambdaRequestParameters
     )
 }

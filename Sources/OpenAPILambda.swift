@@ -14,11 +14,12 @@
 //===----------------------------------------------------------------------===//
 import Foundation
 import AWSLambdaRuntime
+import Logging
 import OpenAPIRuntime
 import HTTPTypes
 
 /// A Lambda function implemented with a OpenAPI server (implementing `APIProtocol` from Swift OpenAPIRuntime)
-public protocol OpenAPILambda {
+public protocol OpenAPILambda: Sendable {
 
     associatedtype Event: Decodable
     associatedtype Output: Encodable
@@ -40,10 +41,19 @@ public protocol OpenAPILambda {
 }
 
 extension OpenAPILambda {
-    /// Initializes and runs the Lambda function.
-    ///
-    /// If you precede your ``EventLoopLambdaHandler`` conformer's declaration with the
-    /// [@main](https://docs.swift.org/swift-book/ReferenceManual/Attributes.html#ID626)
-    /// attribute, the system calls the conformer's `main()` method to launch the lambda function.
-    public static func main() throws { OpenAPILambdaHandler<Self>.main() }
+    /// Returns the Lambda handler function for this OpenAPI Lambda implementation.
+    /// - Returns: A handler function that can be used with AWS Lambda Runtime
+    public static func handler() throws -> (Event, LambdaContext) async throws -> Output {
+        try OpenAPILambdaHandler<Self>().handler
+    }
+
+    /// Start the Lambda Runtime with the Lambda handler function for this OpenAPI Lambda implementation with a custom logger,
+    /// when one is given.
+    /// - Parameter logger: The logger to use for Lambda runtime logging
+    public static func run(logger: Logger? = nil) async throws {
+
+        let _logger = logger ?? Logger(label: "OpenAPILambda")
+        let lambdaRuntime = try LambdaRuntime(logger: _logger, body: Self.handler())
+        try await lambdaRuntime.run()
+    }
 }

@@ -30,17 +30,17 @@ public typealias OpenAPILambdaResponse = (HTTPResponse, String?)
 public typealias OpenAPILambdaRequestParameters = [String: Substring]
 
 /// an OpenAPI handler
-public typealias OpenAPIHandler = @Sendable (HTTPRequest, HTTPBody?, ServerRequestMetadata) async throws -> (
+public typealias OpenAPIHandler = (HTTPRequest, HTTPBody?, ServerRequestMetadata) async throws -> (
     HTTPResponse, HTTPBody?
 )
 
 /// Lambda Transport for OpenAPI generator
 public struct OpenAPILambdaTransport: ServerTransport {
 
-    private var router: OpenAPILambdaRouter
+    private let router: OpenAPILambdaRouter
 
     /// Create a `OpenAPILambdaTransport` with the given `OpenAPILambdaRouter`
-    public init(router: OpenAPILambdaRouter) { self.router = router }
+    init(router: OpenAPILambdaRouter) { self.router = router }
 
     /// Registers an HTTP operation handler at the provided path and method.
     /// - Parameters:

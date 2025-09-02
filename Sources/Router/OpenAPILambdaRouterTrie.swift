@@ -15,16 +15,16 @@
 import HTTPTypes
 
 /// A Trie router implementation
-public struct TrieRouter: OpenAPILambdaRouter {
+struct TrieRouter: OpenAPILambdaRouter {
     private let uriPath: URIPathCollection = URIPath()
 
     /// add a route for a given HTTP method and path and associate a handler
-    public func add(method: HTTPRequest.Method, path: String, handler: @escaping OpenAPIHandler) throws {
+    func add(method: HTTPRequest.Method, path: String, handler: @escaping OpenAPIHandler) throws {
         try uriPath.add(method: method, path: path, handler: handler)
     }
 
     /// Retrieve the handler and path parameter for a given HTTP method and path
-    public func route(method: HTTPRequest.Method, path: String) async throws -> (
+    func route(method: HTTPRequest.Method, path: String) throws -> (
         OpenAPIHandler, OpenAPILambdaRequestParameters
     ) { try uriPath.find(method: method, path: path) }
 }
@@ -46,7 +46,7 @@ protocol URIPathCollection {
 ///  Example :
 ///  an URI of GET /stocks/{symbol} will generate a tree `root -> GET -> stocks -> symbol`
 struct URIPath: URIPathCollection {
-    private var _root = Node()
+    private let _root = Node()
 
     func root() -> Node { self._root }
 

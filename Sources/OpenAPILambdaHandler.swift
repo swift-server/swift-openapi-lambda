@@ -18,7 +18,11 @@ import OpenAPIRuntime
 import HTTPTypes
 
 /// Specialization of LambdaHandler which runs an OpenAPILambda
-public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
+struct OpenAPILambdaHandler<L: OpenAPILambda> {
+
+    private let router: OpenAPILambdaRouter
+    private let transport: OpenAPILambdaTransport
+    private let lambda: L
 
     /// the input type for this Lambda handler (received from the `OpenAPILambda`)
     public typealias Event = L.Event
@@ -31,7 +35,7 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
     /// Create application, set it up and create `OpenAPILambda` from application and create responder
     /// - Parameters
     ///   - context: Lambda initialization context
-    public init(context: LambdaInitializationContext) throws {
+    init() throws {
         self.router = TrieRouter()
         self.transport = OpenAPILambdaTransport(router: self.router)
         self.lambda = try .init(transport: self.transport)
@@ -45,17 +49,17 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
     ///     - context: Runtime ``LambdaContext``.
     ///
     /// - Returns: A Lambda result ot type `Output`.
-    public func handle(_ request: Event, context: LambdaContext) async throws -> Output {
+    func handler(event: L.Event, context: LambdaContext) async throws -> L.Output {
 
-        // by default return HTTP 500
+        // by default returns HTTP 500
         var lambdaResponse: OpenAPILambdaResponse = (HTTPResponse(status: .internalServerError), "unknown error")
 
         do {
             // convert Lambda event source to OpenAPILambdaRequest
-            let request = try lambda.request(context: context, from: request)
+            let request = try lambda.request(context: context, from: event)
 
             // route the request to find the handlers and extract the paramaters
-            let (handler, parameters) = try await router.route(method: request.0.method, path: request.0.path!)
+            let (handler, parameters) = try router.route(method: request.0.method, path: request.0.path!)
 
             // call the request handler (and extract the HTTPRequest and HTTPBody)
             let httpRequest = request.0
@@ -103,8 +107,4 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
         // transform the OpenAPILambdaResponse to the Lambda Output
         return lambda.output(from: lambdaResponse)
     }
-
-    let router: OpenAPILambdaRouter
-    let transport: OpenAPILambdaTransport
-    let lambda: L
 }

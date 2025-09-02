@@ -1,7 +1,8 @@
 .DS_Store
-/.aws-sam/
-/.build
-/.swiftpm
+.aws-sam/
+.build
+.index-build
+.swiftpm
 samconfig.toml
 Package.resolved
 /*.xcodeproj
@@ -10,4 +11,3 @@ DerivedData/
 .swiftpm/config/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 *key
-

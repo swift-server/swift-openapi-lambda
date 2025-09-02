@@ -111,7 +111,7 @@ struct RouterNodeTests {
     }
 
     @Test("Cannot add node to handler")
-    func testCanNotAddNodeToHandler() async {
+    func testCanNotAddNodeToHandler() {
         // given
         let bodyString = "bodyString"
         let handler: OpenAPIHandler = { a, b, c in (HTTPResponse(status: .ok), HTTPBody(bodyString)) }
@@ -177,7 +177,7 @@ struct RouterNodeTests {
     }
 
     @Test("Retrieve param child exists")
-    func testRetrieveParamChildExist() async {
+    func testRetrieveParamChildExist() {
         // given
         let pathElement = "element1"
         let root = Node()
@@ -193,7 +193,7 @@ struct RouterNodeTests {
     }
 
     @Test("Retrieve param child does not exist")
-    func testRetrieveParamChildNOTExist() async {
+    func testRetrieveParamChildNOTExist() {
         // given
         let pathElement = "element1"
         let root = Node()

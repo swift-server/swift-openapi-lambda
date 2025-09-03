@@ -28,7 +28,7 @@ struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
     static func main() async throws {
 
         // when you just need to run the Lambda function, call Self.run()
-        // try await Self.run()
+        try await Self.run()
 
         // =============================
 
@@ -57,19 +57,20 @@ struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
         // When you need full control on this struct lifecycle, for example to inject dependencies,
         // you can create your own instance of `OpenAPILambda`
         // 1. add your custom init() function
-        // 2. create the class
-        // 3. create the lambda handler and pass this class to the initializer
+        // 2. create an instance of this struct, inject any required dependencies,
+        //    such as a database connection
+        // 3. create the lambda handler and pass the instance to its initializer
+        // 4. create the lambda runtime and pass the handler to its initializer
 
-        // let openAPIService = QuoteServiceImpl(i: 42)
-        // let lambda = try OpenAPILambdaHandler(service: openAPIService)
-        // let lambdaHandler = lambda.handler
-        // let lambdaRuntime = LambdaRuntime(body: lambdaHandler)
+        // let openAPIService = QuoteServiceImpl(i: 42) // 2.
+        // let lambda = try OpenAPILambdaHandler(service: openAPIService) // 3.
+        // let lambdaRuntime = LambdaRuntime(body: lambda.handler) // 4.
         // try await lambdaRuntime.run()
     }
 
     // example of dependency injection when using a custom initializer
     // let i: Int
-    // init(i: Int) {
+    // init(i: Int) { // 1.
     //     self.i = i
     // }
     // init() { self.i = 0 } // to comply with protocol

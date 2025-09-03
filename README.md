@@ -39,7 +39,7 @@ dependencies: [
     .package(url: "https://github.com/apple/swift-openapi-runtime.git", from: "1.8.2"),
     
     // add these three dependencies
-    .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "2.0.0-beta.1"),
+    .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "2.0.0-beta.3"),
     .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", from: "1.2.0"),
     .package(url: "https://github.com/swift-server/swift-openapi-lambda.git", from: "2.0.0"),
 ],
@@ -74,7 +74,7 @@ import OpenAPILambda // <-- 1. import this library
 struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi { // <-- 3. add the OpenAPILambdaHttpApi protocol 
 
   // The registration of your OpenAPI handlers
-  init(transport: OpenAPILambdaTransport) throws { // <-- 4. add this constructor (don't remove the call to `registerHandlers(on:)`)
+  func register(transport: OpenAPILambdaTransport) throws { // <-- 4. add this method (calls registerHandlers)
     try self.registerHandlers(on: transport)
   }
 
@@ -85,8 +85,16 @@ struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi { // <-- 3. add the O
 
   // Your existing OpenAPI implementation
   func getQuote(_ input: Operations.getQuote.Input) async throws -> Operations.getQuote.Output {
-    ...
-    return .ok(.init(body: .json(result)))
+    let symbol = input.path.symbol
+    let price = Components.Schemas.quote(
+        symbol: symbol,
+        price: Double.random(in: 100..<150).rounded(),
+        change: Double.random(in: -5..<5).rounded(),
+        changePercent: Double.random(in: -0.05..<0.05),
+        volume: Double.random(in: 10000..<100000).rounded(),
+        timestamp: Date()
+    )
+    return .ok(.init(body: .json(price)))
   }
 }
 ```
@@ -165,7 +173,7 @@ struct CustomServiceLambda: OpenAPILambda {
   typealias Event = YourCustomEvent
   typealias Output = YourCustomResponse
   
-  init(transport: OpenAPILambdaTransport) throws {
+  func register(transport: OpenAPILambdaTransport) throws {
     let handler = YourServiceImpl()
     try handler.registerHandlers(on: transport)
   }
@@ -185,15 +193,43 @@ struct CustomServiceLambda: OpenAPILambda {
 ```swift
 import ServiceLifecycle
 
-// In your OpenAPI service, explicitley create and manage the LambdaRuntime
+// In your OpenAPI service, explicitly create and manage the LambdaRuntime
 static func main() async throws {
   let lambdaRuntime = try LambdaRuntime(body: Self.handler())
   let serviceGroup = ServiceGroup(
     services: [lambdaRuntime],
     gracefulShutdownSignals: [.sigterm],
-    cancellationSignals: [.sigint]
+    cancellationSignals: [.sigint],
+    logger: Logger(label: "ServiceGroup")
   )
   try await serviceGroup.run()
+}
+```
+
+### Dependency Injection
+
+For advanced use cases requiring dependency injection:
+
+```swift
+@main
+struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
+    let customDependency: Int
+    
+    init(customDependency: Int = 0) {
+        self.customDependency = customDependency
+    }
+    
+    // the entry point can be in another file / struct as well.
+    static func main() async throws {
+        let service = QuoteServiceImpl(customDependency: 42)
+        let lambda = try OpenAPILambdaHandler(service: service)
+        let lambdaRuntime = LambdaRuntime(body: lambda.handler)
+        try await lambdaRuntime.run()
+    }
+    
+    func register(transport: OpenAPILambdaTransport) throws {
+        try self.registerHandlers(on: transport)
+    }
 }
 ```
 

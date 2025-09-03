@@ -119,6 +119,10 @@ public struct OpenAPILambdaHandler<OALS: OpenAPILambdaService>: Sendable {
             )
 
         }
+        catch {
+            // some other error happened
+            lambdaResponse = (HTTPResponse(status: .internalServerError), "Unknown error: \(String(reflecting: error))")
+        }
 
         // transform the OpenAPILambdaResponse to the Lambda Output
         return openAPIService.output(from: lambdaResponse)

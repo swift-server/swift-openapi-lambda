@@ -24,7 +24,7 @@ public enum OpenAPILambdaHttpError: Error {
 }
 
 /// An specialization of the `OpenAPILambda` protocol that works with Amazon API Gateway HTTP Mode, aka API Gateway v2
-public protocol OpenAPILambdaHttpApi: OpenAPILambda
+public protocol OpenAPILambdaHttpApi: OpenAPILambdaService
 where
     Event == APIGatewayV2Request,
     Output == APIGatewayV2Response

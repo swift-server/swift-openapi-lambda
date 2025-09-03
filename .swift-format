@@ -52,7 +52,7 @@
     "UseLetInEveryBoundCaseVariable" : false,
     "UseShorthandTypeNames" : true,
     "UseSingleLinePropertyGetter" : false,
-    "UseSynthesizedInitializer" : true,
+    "UseSynthesizedInitializer" : false,
     "UseWhereClausesInForLoops" : false
   },
   "spacesAroundRangeFormationOperators" : false,

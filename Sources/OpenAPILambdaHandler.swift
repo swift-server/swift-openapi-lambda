@@ -18,17 +18,17 @@ import OpenAPIRuntime
 import HTTPTypes
 
 /// Specialization of LambdaHandler which runs an OpenAPILambda
-struct OpenAPILambdaHandler<L: OpenAPILambda> {
+public struct OpenAPILambdaHandler<OALS: OpenAPILambdaService>: Sendable {
 
     private let router: OpenAPILambdaRouter
     private let transport: OpenAPILambdaTransport
-    private let lambda: L
+    private let openAPIService: OALS
 
     /// the input type for this Lambda handler (received from the `OpenAPILambda`)
-    public typealias Event = L.Event
+    public typealias Event = OALS.Event
 
     /// the output type for this Lambda handler (received from the `OpenAPILambda`)
-    public typealias Output = L.Output
+    public typealias Output = OALS.Output
 
     /// Initialize `OpenAPILambdaHandler`.
     ///
@@ -38,7 +38,23 @@ struct OpenAPILambdaHandler<L: OpenAPILambda> {
     init() throws {
         self.router = TrieRouter()
         self.transport = OpenAPILambdaTransport(router: self.router)
-        self.lambda = try .init(transport: self.transport)
+
+        // decouple the OpenAPILambda creation from the registration of teh transport
+        // this allows users to provide their own overloaded init() function to inject dependencies.
+        self.openAPIService = OALS()
+        try self.openAPIService.register(transport: self.transport)
+    }
+
+    /// Initialize an `OpenAPILambdaHandler` with your own `OpenAPILambda` object.
+    ///
+    /// Use this function when you need to inject dependencies in your OpenAPILambda
+    /// - Parameters:
+    ///   - lambda: The `OpenAPILambda` instance to use.
+    public init(service: OALS) throws {
+        self.router = TrieRouter()
+        self.transport = OpenAPILambdaTransport(router: self.router)
+        self.openAPIService = service
+        try self.openAPIService.register(transport: self.transport)
     }
 
     /// The Lambda handling method.
@@ -49,14 +65,14 @@ struct OpenAPILambdaHandler<L: OpenAPILambda> {
     ///     - context: Runtime ``LambdaContext``.
     ///
     /// - Returns: A Lambda result ot type `Output`.
-    func handler(event: L.Event, context: LambdaContext) async throws -> L.Output {
+    public func handler(event: OALS.Event, context: LambdaContext) async throws -> OALS.Output {
 
         // by default returns HTTP 500
         var lambdaResponse: OpenAPILambdaResponse = (HTTPResponse(status: .internalServerError), "unknown error")
 
         do {
             // convert Lambda event source to OpenAPILambdaRequest
-            let request = try lambda.request(context: context, from: event)
+            let request = try openAPIService.request(context: context, from: event)
 
             // route the request to find the handlers and extract the paramaters
             let (handler, parameters) = try router.route(method: request.0.method, path: request.0.path!)
@@ -105,6 +121,6 @@ struct OpenAPILambdaHandler<L: OpenAPILambda> {
         }
 
         // transform the OpenAPILambdaResponse to the Lambda Output
-        return lambda.output(from: lambdaResponse)
+        return openAPIService.output(from: lambdaResponse)
     }
 }

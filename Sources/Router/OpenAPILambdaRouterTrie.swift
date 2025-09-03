@@ -13,20 +13,25 @@
 //
 //===----------------------------------------------------------------------===//
 import HTTPTypes
+import Synchronization
 
 /// A Trie router implementation
-struct TrieRouter: OpenAPILambdaRouter {
-    private let uriPath: URIPathCollection = URIPath()
+final class TrieRouter: OpenAPILambdaRouter {
+    private let uriPath = Mutex<any URIPathCollection>(URIPath())
 
     /// add a route for a given HTTP method and path and associate a handler
     func add(method: HTTPRequest.Method, path: String, handler: @escaping OpenAPIHandler) throws {
-        try uriPath.add(method: method, path: path, handler: handler)
+        try self.uriPath.withLock { @Sendable in
+            try $0.add(method: method, path: path, handler: handler)
+        }
     }
 
     /// Retrieve the handler and path parameter for a given HTTP method and path
     func route(method: HTTPRequest.Method, path: String) throws -> (
         OpenAPIHandler, OpenAPILambdaRequestParameters
-    ) { try uriPath.find(method: method, path: path) }
+    ) {
+        try self.uriPath.withLock { try $0.find(method: method, path: path) }
+    }
 }
 
 enum URIPathCollectionError: Error {

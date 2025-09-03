@@ -21,14 +21,16 @@ import OpenAPILambda
 @main
 struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
 
-    init(transport: OpenAPILambdaTransport) throws {
+    func register(transport: OpenAPILambdaTransport) throws {
         try self.registerHandlers(on: transport)
     }
 
     static func main() async throws {
 
         // when you just need to run the Lambda function, call Self.run()
-        try await Self.run()
+        // try await Self.run()
+
+        // =============================
 
         // when you need to have access to the runtime for advanced usage (dependency injection, Service LifeCycle, etc)
         // create the LambdaRuntime and run it
@@ -49,7 +51,28 @@ struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
         //     logger: Logger(label: "ServiceGroup")
         // )
         // try await serviceGroup.run()
+
+        // =============================
+
+        // When you need full control on this struct lifecycle, for example to inject dependencies,
+        // you can create your own instance of `OpenAPILambda`
+        // 1. add your custom init() function
+        // 2. create the class
+        // 3. create the lambda handler and pass this class to the initializer
+
+        // let openAPIService = QuoteServiceImpl(i: 42)
+        // let lambda = try OpenAPILambdaHandler(service: openAPIService)
+        // let lambdaHandler = lambda.handler
+        // let lambdaRuntime = LambdaRuntime(body: lambdaHandler)
+        // try await lambdaRuntime.run()
     }
+
+    // example of dependency injection when using a custom initializer
+    // let i: Int
+    // init(i: Int) {
+    //     self.i = i
+    // }
+    // init() { self.i = 0 } // to comply with protocol
 
     func getQuote(_ input: Operations.getQuote.Input) async throws -> Operations.getQuote.Output {
 

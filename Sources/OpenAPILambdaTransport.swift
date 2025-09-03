@@ -37,7 +37,7 @@ public typealias OpenAPIHandler = (HTTPRequest, HTTPBody?, ServerRequestMetadata
 /// Lambda Transport for OpenAPI generator
 public struct OpenAPILambdaTransport: ServerTransport {
 
-    private let router: OpenAPILambdaRouter
+    public let router: OpenAPILambdaRouter
 
     /// Create a `OpenAPILambdaTransport` with the given `OpenAPILambdaRouter`
     init(router: OpenAPILambdaRouter) { self.router = router }

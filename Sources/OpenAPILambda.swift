@@ -72,7 +72,7 @@ extension OpenAPILambdaService {
             handler: LambdaHandlerAdapter(handler: try Self.makeHandler())
         )
 
-        let lambdaRuntime = LambdaRuntime(handler: handler, logger: _logger,)
+        let lambdaRuntime = LambdaRuntime(handler: handler, logger: _logger)
         try await lambdaRuntime.run()
     }
 }

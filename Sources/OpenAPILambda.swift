@@ -56,8 +56,8 @@ extension OpenAPILambdaService {
     ///         try await lambdaRuntime.run()
     ///
     /// - Returns: A handler function that can be used with AWS Lambda Runtime
-    public static func handler() throws -> (Event, LambdaContext) async throws -> Output {
-        try OpenAPILambdaHandler<Self>().handler
+    public static func makeHandler() throws -> OpenAPILambdaHandler<Self> {
+        try OpenAPILambdaHandler<Self>()
     }
 
     /// Start the Lambda Runtime with the Lambda handler function for this OpenAPI Lambda implementation with a custom logger,
@@ -65,7 +65,14 @@ extension OpenAPILambdaService {
     /// - Parameter logger: The logger to use for Lambda runtime logging
     public static func run(logger: Logger? = nil) async throws {
         let _logger = logger ?? Logger(label: "OpenAPILambdaService")
-        let lambdaRuntime = LambdaRuntime(logger: _logger, body: try Self.handler())
+
+        let handler = LambdaCodableAdapter(
+            encoder: JSONEncoder(),
+            decoder: JSONDecoder(),
+            handler: LambdaHandlerAdapter(handler: try Self.makeHandler())
+        )
+
+        let lambdaRuntime = LambdaRuntime(handler: handler, logger: _logger,)
         try await lambdaRuntime.run()
     }
 }

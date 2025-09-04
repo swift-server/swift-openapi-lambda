@@ -18,7 +18,7 @@ import OpenAPIRuntime
 import HTTPTypes
 
 /// Specialization of LambdaHandler which runs an OpenAPILambda
-public struct OpenAPILambdaHandler<OALS: OpenAPILambdaService>: Sendable {
+public struct OpenAPILambdaHandler<OALS: OpenAPILambdaService>: LambdaHandler {
 
     private let router: OpenAPILambdaRouter
     private let transport: OpenAPILambdaTransport
@@ -65,7 +65,7 @@ public struct OpenAPILambdaHandler<OALS: OpenAPILambdaService>: Sendable {
     ///     - context: Runtime ``LambdaContext``.
     ///
     /// - Returns: A Lambda result ot type `Output`.
-    public func handler(event: OALS.Event, context: LambdaContext) async throws -> OALS.Output {
+    public func handle(_ event: OALS.Event, context: AWSLambdaRuntime.LambdaContext) async throws -> OALS.Output {
 
         // by default returns HTTP 500
         var lambdaResponse: OpenAPILambdaResponse = (HTTPResponse(status: .internalServerError), "unknown error")

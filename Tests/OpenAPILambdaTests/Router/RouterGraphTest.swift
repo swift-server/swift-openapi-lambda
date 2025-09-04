@@ -433,4 +433,6 @@ struct RouterGraphTests {
         return graph
     }
 
+    // TODO: add a test to check what happens when two methods + identiacal paths with two different handlers are added
+
 }

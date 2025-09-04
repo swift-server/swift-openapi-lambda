@@ -20,6 +20,11 @@ The **sam build** command uses Docker to compile your Swift Lambda function and 
 sam build
 ```
 
+On macOS, you might need to run this command if `sam` doesn't see `docker`:
+```bash
+export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
+```
+
 ## Deploy the application
 
 The **sam deploy** command creates the Lambda function and API Gateway in your AWS account.

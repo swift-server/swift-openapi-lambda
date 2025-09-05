@@ -80,7 +80,8 @@ struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi { // <-- 3. add the O
 
   // the entry point for your Lambda function
   static func main() async throws { // <-- 5. add this entry point to start the lambdaRuntime
-      try await Self.run()
+    let openAPIService = QuoteServiceImpl()  
+    try await openAPIService.run()
   }
 
   // Your existing OpenAPI implementation

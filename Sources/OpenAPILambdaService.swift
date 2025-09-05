@@ -28,7 +28,7 @@ public protocol OpenAPILambdaService: Sendable {
     ///
     /// This is where your OpenAPILambdaService implementation must register the transport
     func register(transport: OpenAPILambdaTransport) throws
-    
+
     /// Convert from `Event` type to `OpenAPILambdaRequest`
     /// - Parameters:
     ///   - context: Lambda context
@@ -54,5 +54,3 @@ extension OpenAPILambdaService {
         try await lambdaRuntime.run()
     }
 }
-
-

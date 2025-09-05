@@ -32,7 +32,7 @@ final class TrieRouter: OpenAPILambdaRouter, CustomStringConvertible {
     ) {
         try self.uriPath.withLock { try $0.find(method: method, path: path) }
     }
-    
+
     var description: String {
         uriPath.withLock { uriPath in
             var routes: [String] = []
@@ -40,25 +40,43 @@ final class TrieRouter: OpenAPILambdaRouter, CustomStringConvertible {
             return routes.joined(separator: "\n")
         }
     }
-    
-    private func collectRoutes(from node: Node, method: HTTPRequest.Method?, path: String, parameters: [String], routes: inout [String]) {
+
+    private func collectRoutes(
+        from node: Node,
+        method: HTTPRequest.Method?,
+        path: String,
+        parameters: [String],
+        routes: inout [String]
+    ) {
         // If this node has a handler, we found a complete route
         if let _ = node.handlerChild(), let method = method {
             let paramString = parameters.isEmpty ? "" : " " + parameters.map { "\($0)=value" }.joined(separator: " ")
             routes.append("\(method.rawValue) \(path)\(paramString)")
         }
-        
+
         // Traverse all children
         for (_, child) in node.children {
             switch child.value {
             case .httpMethod(let httpMethod):
                 collectRoutes(from: child, method: httpMethod, path: path, parameters: parameters, routes: &routes)
             case .pathElement(let element):
-                collectRoutes(from: child, method: method, path: path + "/" + element, parameters: parameters, routes: &routes)
+                collectRoutes(
+                    from: child,
+                    method: method,
+                    path: path + "/" + element,
+                    parameters: parameters,
+                    routes: &routes
+                )
             case .pathParameter(let param):
                 var newParams = parameters
                 newParams.append(param)
-                collectRoutes(from: child, method: method, path: path + "/{\(param)}", parameters: newParams, routes: &routes)
+                collectRoutes(
+                    from: child,
+                    method: method,
+                    path: path + "/{\(param)}",
+                    parameters: newParams,
+                    routes: &routes
+                )
             case .handler, .root:
                 collectRoutes(from: child, method: method, path: path, parameters: parameters, routes: &routes)
             }

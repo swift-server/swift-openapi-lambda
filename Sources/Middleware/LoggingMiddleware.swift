@@ -21,11 +21,37 @@ import OpenAPIRuntime
 /// Only active at .trace level
 public struct LoggingMiddleware: ServerMiddleware {
 
-		private let logger: Logger
-		public init(logger: Logger) {
-				self.logger = logger
-		}
+    private let logger: Logger
 
+    /// A middleware that logs request and response metadata.
+    /// Only active at .trace level
+    ///
+    /// - Parameters:
+    ///   - logger: The logger instance to use for logging request/response data
+    ///
+    /// - Note: This middleware only logs at .trace level and will not generate output at other log levels
+    ///
+    public init(logger: Logger) {
+        self.logger = logger
+    }
+
+    /// Intercepts HTTP requests and logs request/response metadata at trace level.
+    ///
+    /// - Parameters:
+    ///   - request: The incoming HTTP request
+    ///   - body: The request body, if any
+    ///   - metadata: Metadata associated with the request
+    ///   - operationID: The OpenAPI operation ID for this request
+    ///   - next: The next middleware/handler in the chain
+    ///
+    /// - Returns: A tuple containing the HTTP response and optional response body
+    ///
+    /// - Throws: Rethrows any errors from downstream handlers
+    ///
+    /// This method logs:
+    /// - The request method and path on entry
+    /// - The response status code on successful completion
+    /// - Error descriptions if an error occurs
     public func intercept(
         _ request: HTTPRequest,
         body: HTTPBody?,
@@ -39,7 +65,8 @@ public struct LoggingMiddleware: ServerMiddleware {
             let (response, responseBody) = try await next(request, body, metadata)
             logger.trace("<<<: \(response.status.code)")
             return (response, responseBody)
-        } catch {
+        }
+        catch {
             logger.trace("!!!: \(error.localizedDescription)")
             throw error
         }

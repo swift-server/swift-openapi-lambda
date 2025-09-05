@@ -91,7 +91,9 @@ public struct OpenAPILambdaHandler<OALS: OpenAPILambdaService>: LambdaHandler, S
         catch OpenAPILambdaRouterError.noRouteForPath(let method, let path) {
 
             // There is no hadler registered for this path. This is a programming error.
-            lambdaResponse = (HTTPResponse(status: .notFound), "There is no route registered for the path \(method) \(path)")
+            lambdaResponse = (
+                HTTPResponse(status: .notFound), "There is no route registered for the path \(method) \(path)"
+            )
 
         }
         catch OpenAPILambdaHttpError.invalidMethod(let method) {

@@ -8,8 +8,7 @@
     "x-forwarded-for": "191.95.148.219",
     "x-forwarded-proto": "https",
     "accept": "*/*",
-    "user-agent": "curl/8.1.2",
-    "authorization": "Bearer 123"
+    "user-agent": "curl/8.1.2"
   },
   "requestContext": {
     "apiId": "b2k1t8fon7",
@@ -17,13 +16,8 @@
       "sourceIp": "191.95.148.219",
       "userAgent": "curl/8.1.2",
       "method": "GET",
-      "path": "/stocks/AAPL",
+      "path": "/health",
       "protocol": "HTTP/1.1"
-    },
-    "authorizer": {
-            "lambda": {
-                "abc1": "xyz1"
-            }
     },
     "timeEpoch": 1701957940365,
     "domainPrefix": "b2k1t8fon7",
@@ -36,5 +30,5 @@
   "isBase64Encoded": false,
   "version": "2.0",
   "routeKey": "$default",
-  "rawPath": "/stocks/AAPL"
+  "rawPath": "/health"
 }

@@ -35,12 +35,16 @@ public typealias OpenAPIHandler = @Sendable (HTTPRequest, HTTPBody?, ServerReque
 )
 
 /// Lambda Transport for OpenAPI generator
-public struct OpenAPILambdaTransport: ServerTransport {
+public struct OpenAPILambdaTransport: ServerTransport, Sendable {
 
-    private var router: OpenAPILambdaRouter
+    /// The router for the OpenAPILambdaTransport
+    /// Use this router to register your OpenAPI handlers
+    /// and add your own route, such as /health
+    public let router: OpenAPILambdaRouter
 
     /// Create a `OpenAPILambdaTransport` with the given `OpenAPILambdaRouter`
-    public init(router: OpenAPILambdaRouter) { self.router = router }
+    /// - Parameter router: The router to use for the transport.
+    init(router: OpenAPILambdaRouter) { self.router = router }
 
     /// Registers an HTTP operation handler at the provided path and method.
     /// - Parameters:

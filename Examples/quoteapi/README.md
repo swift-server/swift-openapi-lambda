@@ -20,6 +20,11 @@ The **sam build** command uses Docker to compile your Swift Lambda function and 
 sam build
 ```
 
+On macOS, you might need to run this command if `sam` doesn't see `docker`:
+```bash
+export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
+```
+
 ## Deploy the application
 
 The **sam deploy** command creates the Lambda function and API Gateway in your AWS account.
@@ -28,13 +33,7 @@ The **sam deploy** command creates the Lambda function and API Gateway in your A
 sam deploy --guided
 ```
 
-Accept the default response to every prompt, except the following warning:
-
-```bash
-QuoteService may not have authorization defined, Is this okay? [y/N]: y
-```
-
-The project creates a publicly accessible API endpoint. This is a warning to inform you the API does not have authorization. If you are interested in adding authorization to the API, please refer to the [SAM Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-httpapi.html).
+The project creates an API endpoint protected by a bearer token authorization. Use token value '123' while testing. Youc an change the token validation logic in the `LambdaAuthorizer` function. To learn more about Lambda authorizer function, refer to [the API Gateway documentation](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html).
 
 ## Use the API
 
@@ -54,7 +53,7 @@ Use cURL or a tool such as [Postman](https://www.postman.com/) to interact with 
 **Invoke the API Endpoint**
 
 ```bash
-curl https://[your-api-endpoint]/stocks/AMZN
+curl -H 'Authorization: Bearer 123' https://[your-api-endpoint]/stocks/AMZN
 ```
 
 ## Test the API Locally
@@ -68,6 +67,11 @@ When a Lambda function is invoked, API Gateway sends an event to the function wi
 
 ```bash
 sam local invoke QuoteService --event events/GetQuote.json
+```
+
+On macOS, you might need to run this command if `sam` doesn't see `docker`:
+```bash
+export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
 ```
 
 ## Cleanup

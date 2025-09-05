@@ -14,20 +14,21 @@
 //===----------------------------------------------------------------------===//
 import Foundation
 import AWSLambdaRuntime
+import Logging
 import OpenAPIRuntime
 import HTTPTypes
 
 /// A Lambda function implemented with a OpenAPI server (implementing `APIProtocol` from Swift OpenAPIRuntime)
-public protocol OpenAPILambda {
+public protocol OpenAPILambdaService: Sendable {
 
-    associatedtype Event: Decodable
-    associatedtype Output: Encodable
+    associatedtype Event: Decodable, Sendable
+    associatedtype Output: Encodable, Sendable
 
-    /// Initialize application.
+    /// Injects the transport.
     ///
-    /// This is where you create your OpenAPI service implementation and register the transport
-    init(transport: OpenAPILambdaTransport) throws
-
+    /// This is where your OpenAPILambdaService implementation must register the transport
+    func register(transport: OpenAPILambdaTransport) throws
+    
     /// Convert from `Event` type to `OpenAPILambdaRequest`
     /// - Parameters:
     ///   - context: Lambda context
@@ -39,11 +40,19 @@ public protocol OpenAPILambda {
     func output(from: OpenAPILambdaResponse) -> Output
 }
 
-extension OpenAPILambda {
-    /// Initializes and runs the Lambda function.
+extension OpenAPILambdaService {
+
+    /// Start the Lambda Runtime with the Lambda handler function
+    /// for this OpenAPI Lambda service implementation with a custom logger,
     ///
-    /// If you precede your ``EventLoopLambdaHandler`` conformer's declaration with the
-    /// [@main](https://docs.swift.org/swift-book/ReferenceManual/Attributes.html#ID626)
-    /// attribute, the system calls the conformer's `main()` method to launch the lambda function.
-    public static func main() throws { OpenAPILambdaHandler<Self>.main() }
+    /// - Parameter logger: The logger to use for Lambda runtime logging
+    public func run(logger: Logger? = nil) async throws {
+        let _logger = logger ?? Logger(label: "OpenAPILambdaService")
+
+        let lambda = try OpenAPILambdaHandler(withService: self)
+        let lambdaRuntime = LambdaRuntime(logger: _logger, body: lambda.handle)
+        try await lambdaRuntime.run()
+    }
 }
+
+

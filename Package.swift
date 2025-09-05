@@ -5,13 +5,12 @@ import PackageDescription
 
 let package = Package(
     name: "swift-openapi-lambda",
-    platforms: [.macOS(.v12)],
+    platforms: [.macOS(.v15)],
     products: [.library(name: "OpenAPILambda", targets: ["OpenAPILambda"])],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-openapi-runtime.git", from: "1.0.0"),
-        .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "1.0.0-alpha.3"),
-        .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
+        .package(url: "https://github.com/apple/swift-openapi-runtime.git", from: "1.8.2"),
+        .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "2.0.0-beta.3"),
+        .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", from: "1.2.0"),
     ],
     targets: [
         .target(
@@ -21,8 +20,7 @@ let package = Package(
                 .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-events"),
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
             ],
-            path: "Sources",
-            swiftSettings: [.enableExperimentalFeature("StrictConcurrency=complete")]
+            path: "Sources"
         ),
         // test targets
         .testTarget(

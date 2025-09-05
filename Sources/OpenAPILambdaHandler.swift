@@ -18,23 +18,28 @@ import OpenAPIRuntime
 import HTTPTypes
 
 /// Specialization of LambdaHandler which runs an OpenAPILambda
-public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
+public struct OpenAPILambdaHandler<OALS: OpenAPILambdaService>: LambdaHandler, Sendable {
+
+    private let transport: OpenAPILambdaTransport
+    private let openAPIService: OALS
 
     /// the input type for this Lambda handler (received from the `OpenAPILambda`)
-    public typealias Event = L.Event
+    public typealias Event = OALS.Event
 
     /// the output type for this Lambda handler (received from the `OpenAPILambda`)
-    public typealias Output = L.Output
+    public typealias Output = OALS.Output
 
     /// Initialize `OpenAPILambdaHandler`.
     ///
-    /// Create application, set it up and create `OpenAPILambda` from application and create responder
+    /// This initializer decouples the OpenAPILambdaService creation from the registration of the transport
+    /// this allows users to control the lifecycle of their service and to inject dependencies.
+    ///
     /// - Parameters
-    ///   - context: Lambda initialization context
-    public init(context: LambdaInitializationContext) throws {
-        self.router = TrieRouter()
-        self.transport = OpenAPILambdaTransport(router: self.router)
-        self.lambda = try .init(transport: self.transport)
+    ///   - withService: The OpenAPI Lambda service to bind to this Lambda handler function
+    public init(withService openAPILambdaService: OALS) throws {
+        self.openAPIService = openAPILambdaService
+        self.transport = OpenAPILambdaTransport(router: TrieRouter())
+        try self.openAPIService.register(transport: self.transport)
     }
 
     /// The Lambda handling method.
@@ -45,17 +50,17 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
     ///     - context: Runtime ``LambdaContext``.
     ///
     /// - Returns: A Lambda result ot type `Output`.
-    public func handle(_ request: Event, context: LambdaContext) async throws -> Output {
+    public func handle(_ event: OALS.Event, context: AWSLambdaRuntime.LambdaContext) async throws -> OALS.Output {
 
-        // by default return HTTP 500
+        // by default returns HTTP 500
         var lambdaResponse: OpenAPILambdaResponse = (HTTPResponse(status: .internalServerError), "unknown error")
 
         do {
             // convert Lambda event source to OpenAPILambdaRequest
-            let request = try lambda.request(context: context, from: request)
+            let request = try openAPIService.request(context: context, from: event)
 
             // route the request to find the handlers and extract the paramaters
-            let (handler, parameters) = try await router.route(method: request.0.method, path: request.0.path!)
+            let (handler, parameters) = try self.transport.router.route(method: request.0.method, path: request.0.path!)
 
             // call the request handler (and extract the HTTPRequest and HTTPBody)
             let httpRequest = request.0
@@ -83,10 +88,10 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
             lambdaResponse = (HTTPResponse(status: .notFound), "There is no route registered for the method \(method)")
 
         }
-        catch OpenAPILambdaRouterError.noRouteForPath(let path) {
+        catch OpenAPILambdaRouterError.noRouteForPath(let method, let path) {
 
             // There is no hadler registered for this path. This is a programming error.
-            lambdaResponse = (HTTPResponse(status: .notFound), "There is no route registered for the path \(path)")
+            lambdaResponse = (HTTPResponse(status: .notFound), "There is no route registered for the path \(method) \(path)")
 
         }
         catch OpenAPILambdaHttpError.invalidMethod(let method) {
@@ -99,12 +104,12 @@ public struct OpenAPILambdaHandler<L: OpenAPILambda>: LambdaHandler {
             )
 
         }
+        catch {
+            // some other error happened
+            lambdaResponse = (HTTPResponse(status: .internalServerError), "Unknown error: \(String(reflecting: error))")
+        }
 
         // transform the OpenAPILambdaResponse to the Lambda Output
-        return lambda.output(from: lambdaResponse)
+        return openAPIService.output(from: lambdaResponse)
     }
-
-    let router: OpenAPILambdaRouter
-    let transport: OpenAPILambdaTransport
-    let lambda: L
 }

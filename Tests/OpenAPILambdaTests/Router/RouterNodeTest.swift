@@ -14,12 +14,9 @@
 //===----------------------------------------------------------------------===//
 import HTTPTypes
 import OpenAPIRuntime
+import Testing
 
 @testable import OpenAPILambda
-
-// only run unit tests on Swift 6.x
-#if swift(>=6.0)
-import Testing
 
 struct RouterNodeTests {
     @Test("First node is root")
@@ -212,4 +209,3 @@ struct RouterNodeTests {
     }
 
 }
-#endif

@@ -72,7 +72,7 @@ let simpleAuthorizerHandler:
 let runtime = LambdaRuntime(body: simpleAuthorizerHandler)
 try await runtime.run()
 
-// Another, more complex, example 
+// Another, more complex, example
 //
 // This is an example of a policy authorizer that always authorizes the request.
 // The policy authorizer returns an IAM policy document that defines what the Lambda function caller can do and optional context key-value pairs

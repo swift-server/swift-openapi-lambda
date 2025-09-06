@@ -1,6 +1,7 @@
 ### Add functions here and link them to builder-bot format MUST BE "build-FunctionResourceName in template.yaml"
 
 build-QuoteService: builder-bot
+build-LambdaAuthorizer: builder-bot
 
 # Helper commands
 build:
@@ -10,16 +11,20 @@ deploy:
 	sam deploy 
 
 logs:
-	sam logs --stack-name QuoteService --name QuoteService 
+	sam logs --stack-name QuoteService
 
 tail:
-	sam logs --stack-name QuoteService --name QuoteService --tail
+	sam logs --stack-name QuoteService --tail
 
 local:
-	LOCAL_LAMBDA_SERVER_ENABLED=true swift run QuoteService
+	swift run QuoteService
+
+local-invoke:
+	curl -v -H 'Authorization: Bearer 123' -X POST --data @events/GetQuote.json http://127.0.0.1:7000/invoke
 
 invoke: 
-	curl -v -H 'Authorization: 123' https://k3lbszo7x6.execute-api.us-east-1.amazonaws.com/stocks/AAPL
+##	curl -v -H 'Authorization: Bearer 123' https://<REPLACE_WITH_YOUR_API_URI>/stocks/AAPL
+	curl -v -H 'Authorization: Bearer 123' https://lq2rria2n6.execute-api.us-east-1.amazonaws.com/stocks/AAPL
 
 ######################  No Change required below this line  ##########################
 
@@ -30,17 +35,15 @@ builder-bot:
 	$(eval $@ARTIFACTS_DIR = $(PWD)/.aws-sam/build/$($@PRODUCT))
 
 ## Building from swift-openapi-lambda in a local directory (not from Github)
-##  1. git clone https://github.com/swift-server/swift-openapi-lambda ..
-##  2. Change `Package.swift` dependency to ../swift-openapi-lambda 
+##  2. Change `Package.swift` dependency to path: "../.."
 
-##  3. add /.. to BUILD_SRC
-##	$(eval $@BUILD_SRC = $(PWD)/..) 
-	$(eval $@BUILD_SRC = $(PWD)) 
+##  3. add /../.. to BUILD_SRC
+	$(eval $@BUILD_SRC = $(PWD)/../..) 
+## 	$(eval $@BUILD_SRC = $(PWD)) 
 
-##  4. add `cd quoteapi &&` to the docker BUILD_CMD  
-##	$(eval $@BUILD_CMD = "ls && cd quoteapi && swift build --static-swift-stdlib --product $($@PRODUCT) -c release --build-path /build-target")
-
-	$(eval $@BUILD_CMD = "swift build --static-swift-stdlib --product $($@PRODUCT) -c release --build-path /build-target")
+##  4. add `cd Examples/quoteapi &&` to the docker BUILD_CMD  
+	$(eval $@BUILD_CMD = "ls && cd Examples/quoteapi && swift build --static-swift-stdlib --product $($@PRODUCT) -c release --build-path /build-target")
+## 	$(eval $@BUILD_CMD = "swift build --static-swift-stdlib --product $($@PRODUCT) -c release --build-path /build-target")
 	
 	# build docker image to compile Swift for Linux
 	docker build -f Dockerfile . -t swift-builder

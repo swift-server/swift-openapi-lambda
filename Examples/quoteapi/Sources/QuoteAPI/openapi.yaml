@@ -50,5 +50,7 @@ paths:
                 $ref: '#/components/schemas/quote'
         400:
           description: Bad Request
+        401:
+          description: Authentication required
         404:
           description: Not Found

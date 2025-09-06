@@ -22,24 +22,24 @@ import HTTPTypes
 /// - a path element (represented as a `String`),
 /// - a path parameter (represented as a `String`)
 /// - a handler, only for leaf nodes (represented as `OpenAPIHandler`)
-class Node {
+final class Node {
     let value: NodeValue
     var children: [String: Node] = [:]
 
     /// Default init, create a root node
-    public init() { value = .root }
+    init() { value = .root }
 
     /// Creates a node for an HTTP method
-    public init(httpMethod: HTTPRequest.Method) { value = .httpMethod(httpMethod) }
+    init(httpMethod: HTTPRequest.Method) { value = .httpMethod(httpMethod) }
 
     /// Creates a node for a path element
-    public init(pathElement: String) { value = .pathElement(pathElement) }
+    init(pathElement: String) { value = .pathElement(pathElement) }
 
     /// Creates a node for a path parameter
-    public init(parameterName: String) { value = .pathParameter(parameterName) }
+    init(parameterName: String) { value = .pathParameter(parameterName) }
 
     /// Creates a node for an OpenAPI handler
-    public init(handler: @escaping OpenAPIHandler) { value = .handler(handler) }
+    init(handler: @escaping OpenAPIHandler) { value = .handler(handler) }
 
     /// Creates a node for an existing node value
     private init(value: NodeValue) { self.value = value }
@@ -62,8 +62,8 @@ class Node {
     /// - Throws:
     ///   - URIPathCollectionError.canNotAddChildToHandlerNode when trying to add a child to leaf node of type `.handler`
     ///   - URIPathCollectionError.canNotHaveMultipleParamChilds when trying to add multiple child node of type `.parameter`
-
     func add(pathElement: String) throws -> Node { try add(child: NodeValue.pathElement(pathElement)) }
+
     /// Convenience method to add a child node of type path parameter  to this node
     /// - Parameter:
     ///     - pathParameter: the name of a path parameter. A path parameter is a `{name}` usually found between `/` characters in the URI
@@ -72,8 +72,8 @@ class Node {
     /// - Throws:
     ///   - URIPathCollectionError.canNotAddChildToHandlerNode when trying to add a child to leaf node of type `.handler`
     ///   - URIPathCollectionError.canNotHaveMultipleParamChilds when trying to add multiple child node of type `.parameter`
-
     func add(parameter: String) throws -> Node { try add(child: NodeValue.pathParameter(parameter)) }
+
     /// Convenience method to add a child node of type handler to this node
     /// - Parameter:
     ///     - handler: a function handler. A handler MUST be a leaf node (it has no children) and is of type `OpenAPIHandler`

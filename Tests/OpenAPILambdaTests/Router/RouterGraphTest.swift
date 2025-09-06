@@ -14,12 +14,9 @@
 //===----------------------------------------------------------------------===//
 import HTTPTypes
 import OpenAPIRuntime
+import Testing
 
 @testable import OpenAPILambda
-
-// only run unit tests on Swift 6.x
-#if swift(>=6.0)
-import Testing
 
 struct RouterGraphTests {
     @Test("Path with no parameters")
@@ -323,9 +320,8 @@ struct RouterGraphTests {
 
         //when
         #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }
-        let (handler, metadata) = try graph.find(method: method, path: pathToTest)
+        let (_, metadata) = try graph.find(method: method, path: pathToTest)
         #expect(metadata.count == 0)
-        #expect(handler != nil)
     }
 
     @Test(
@@ -346,11 +342,10 @@ struct RouterGraphTests {
 
         //when
         #expect(throws: Never.self) {
-            let (handler, metadata) = try graph.find(method: method, path: pathToTest)
+            let (_, metadata) = try graph.find(method: method, path: pathToTest)
 
             // then (we can not test if the query string param have been decoded, that's the job of the openapi runtime.)
             #expect(metadata.count == 1)
-            #expect(handler != nil)
         }
 
     }
@@ -365,9 +360,8 @@ struct RouterGraphTests {
 
         //when
         #expect(throws: Never.self) { try graph.find(method: method, path: pathToTest) }
-        let (handler, metadata) = try graph.find(method: method, path: pathToTest)
+        let (_, metadata) = try graph.find(method: method, path: pathToTest)
         #expect(metadata.count == 1)
-        #expect(handler != nil)
     }
 
     @Test("Find handler error 1")
@@ -439,5 +433,6 @@ struct RouterGraphTests {
         return graph
     }
 
+    // TODO: add a test to check what happens when two methods + identiacal paths with two different handlers are added
+
 }
-#endif

@@ -13,20 +13,75 @@
 //
 //===----------------------------------------------------------------------===//
 import HTTPTypes
+import Synchronization
 
 /// A Trie router implementation
-public struct TrieRouter: OpenAPILambdaRouter {
-    private let uriPath: URIPathCollection = URIPath()
+final class TrieRouter: OpenAPILambdaRouter, CustomStringConvertible {
+    private let uriPath = Mutex<any URIPathCollection>(URIPath())
 
     /// add a route for a given HTTP method and path and associate a handler
-    public func add(method: HTTPRequest.Method, path: String, handler: @escaping OpenAPIHandler) throws {
-        try uriPath.add(method: method, path: path, handler: handler)
+    func add(method: HTTPRequest.Method, path: String, handler: @escaping OpenAPIHandler) throws {
+        try self.uriPath.withLock { @Sendable in
+            try $0.add(method: method, path: path, handler: handler)
+        }
     }
 
     /// Retrieve the handler and path parameter for a given HTTP method and path
-    public func route(method: HTTPRequest.Method, path: String) async throws -> (
+    func route(method: HTTPRequest.Method, path: String) throws -> (
         OpenAPIHandler, OpenAPILambdaRequestParameters
-    ) { try uriPath.find(method: method, path: path) }
+    ) {
+        try self.uriPath.withLock { try $0.find(method: method, path: path) }
+    }
+
+    var description: String {
+        uriPath.withLock { uriPath in
+            var routes: [String] = []
+            collectRoutes(from: uriPath.root(), method: nil, path: "", parameters: [], routes: &routes)
+            return routes.joined(separator: "\n")
+        }
+    }
+
+    private func collectRoutes(
+        from node: Node,
+        method: HTTPRequest.Method?,
+        path: String,
+        parameters: [String],
+        routes: inout [String]
+    ) {
+        // If this node has a handler, we found a complete route
+        if let _ = node.handlerChild(), let method = method {
+            let paramString = parameters.isEmpty ? "" : " " + parameters.map { "\($0)=value" }.joined(separator: " ")
+            routes.append("\(method.rawValue) \(path)\(paramString)")
+        }
+
+        // Traverse all children
+        for (_, child) in node.children {
+            switch child.value {
+            case .httpMethod(let httpMethod):
+                collectRoutes(from: child, method: httpMethod, path: path, parameters: parameters, routes: &routes)
+            case .pathElement(let element):
+                collectRoutes(
+                    from: child,
+                    method: method,
+                    path: path + "/" + element,
+                    parameters: parameters,
+                    routes: &routes
+                )
+            case .pathParameter(let param):
+                var newParams = parameters
+                newParams.append(param)
+                collectRoutes(
+                    from: child,
+                    method: method,
+                    path: path + "/{\(param)}",
+                    parameters: newParams,
+                    routes: &routes
+                )
+            case .handler, .root:
+                collectRoutes(from: child, method: method, path: path, parameters: parameters, routes: &routes)
+            }
+        }
+    }
 }
 
 enum URIPathCollectionError: Error {
@@ -46,7 +101,7 @@ protocol URIPathCollection {
 ///  Example :
 ///  an URI of GET /stocks/{symbol} will generate a tree `root -> GET -> stocks -> symbol`
 struct URIPath: URIPathCollection {
-    private var _root = Node()
+    private let _root = Node()
 
     func root() -> Node { self._root }
 
@@ -126,7 +181,7 @@ struct URIPath: URIPathCollection {
                     currentNode = child
                 }
                 else {
-                    throw OpenAPILambdaRouterError.noRouteForPath(path)
+                    throw OpenAPILambdaRouterError.noRouteForPath(method, path)
                 }
             }
         }

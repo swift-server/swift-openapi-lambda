@@ -26,20 +26,24 @@ struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
 
     func register(transport: OpenAPILambdaTransport) throws {
 
+        // OPTIONAL
         // you have a chance here to customize the routes, for example
         try transport.router.get("/health") { _, _ in
             "OK"
         }
         logger.trace("Available Routes\n\(transport.router)")  // print the router tree (for debugging purposes)
 
+        // OPTIONAL
         // to log all requests and their responses, add a logging middleware
         let loggingMiddleware = LoggingMiddleware(logger: logger)
 
+        // OPTIONAL
         // This app includes a sample authorization middleware
         // It transforms the bearer token into a username.
         // The user name can be access through a TaskLocal variable.
         let authenticationMiddleware = self.authenticationMiddleware()
 
+        // MANDATORY (middlewares are optional)
         try self.registerHandlers(on: transport, middlewares: [loggingMiddleware, authenticationMiddleware])
     }
 
@@ -100,6 +104,7 @@ struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
 
     func getQuote(_ input: Operations.getQuote.Input) async throws -> Operations.getQuote.Output {
 
+        // OPTIONAL
         // Check if the Authentication Middleware has been able to authenticate the user
         guard let user = AuthenticationServerMiddleware.User.current else { return .unauthorized(.init()) }
 

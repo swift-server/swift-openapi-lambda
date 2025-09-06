@@ -31,6 +31,49 @@ import AWSLambdaEvents
 import AWSLambdaRuntime
 
 //
+// This is an example of a simple authorizer that always authorizes the request.
+// A simple authorizer returns a yes/no decision and optional context key-value pairs
+//
+// Warning: this is an overly simplified authentication strategy, checking
+// for the presence of a token.
+//
+// In your project, here you would likely call out to a library that performs
+// a cryptographic validation, or similar.
+//
+// The code is for illustrative purposes only and should not be used directly.
+let simpleAuthorizerHandler:
+    (APIGatewayLambdaAuthorizerRequest, LambdaContext) async throws -> APIGatewayLambdaAuthorizerSimpleResponse = {
+        (request: APIGatewayLambdaAuthorizerRequest, context: LambdaContext) in
+
+        context.logger.debug("+++ Simple Authorizer called +++")
+
+        guard let authToken = request.headers["authorization"]
+        else {
+            context.logger.warning("Missing Authorization header")
+            return .init(isAuthorized: false, context: [:])
+        }
+
+        // do not take an authorization decision here.
+        // bring the token to the OpenAPI service and let the developer
+        // verify authorization there.
+
+        return APIGatewayLambdaAuthorizerSimpleResponse(
+            // this is the authorization decision: yes or no
+            isAuthorized: true,
+
+            // this is additional context we want to return to the caller
+            // these values can be retrieved in requestContext.authorizer of the APIGatewayv2 request
+            context: ["token": authToken]
+        )
+    }
+
+// create the runtime and start polling for new events.
+// in this demo we use the simple authorizer handler
+let runtime = LambdaRuntime(body: simpleAuthorizerHandler)
+try await runtime.run()
+
+// Another, more complex, example 
+//
 // This is an example of a policy authorizer that always authorizes the request.
 // The policy authorizer returns an IAM policy document that defines what the Lambda function caller can do and optional context key-value pairs
 //
@@ -65,39 +108,3 @@ import AWSLambdaRuntime
 //             ]
 //         )
 //     }
-
-//
-// This is an example of a simple authorizer that always authorizes the request.
-// A simple authorizer returns a yes/no decision and optional context key-value pairs
-//
-// This code doesn't perform any type of token validation. It should be used as a reference only.
-let simpleAuthorizerHandler:
-    (APIGatewayLambdaAuthorizerRequest, LambdaContext) async throws -> APIGatewayLambdaAuthorizerSimpleResponse = {
-        (request: APIGatewayLambdaAuthorizerRequest, context: LambdaContext) in
-
-        context.logger.debug("+++ Simple Authorizer called +++")
-
-        guard let authToken = request.headers["authorization"]
-        else {
-            context.logger.warning("Missing Authorization header")
-            return .init(isAuthorized: false, context: [:])
-        }
-
-        // do not take an authorization decision here.
-        // bring the token to the OpenAPI service and let the developer
-        // verify authorization there.
-
-        return APIGatewayLambdaAuthorizerSimpleResponse(
-            // this is the authorization decision: yes or no
-            isAuthorized: true,
-
-            // this is additional context we want to return to the caller
-            // these values can be retrieved in requestContext.authorizer of the APIGatewayv2 request
-            context: ["token": authToken]
-        )
-    }
-
-// create the runtime and start polling for new events.
-// in this demo we use the simple authorizer handler
-let runtime = LambdaRuntime(body: simpleAuthorizerHandler)
-try await runtime.run()

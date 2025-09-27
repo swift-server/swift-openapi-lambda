@@ -2,7 +2,6 @@
 
 This application illustrates how to deploy a Server-Side Swift workload on AWS using the [AWS Serverless Application Model (SAM)](https://aws.amazon.com/serverless/sam/) toolkit. The workload is a simple REST API that returns a string from an Amazon API Gateway. Requests to the API Gateway endpoint are handled by an AWS Lambda Function written in Swift.
 
-
 ## Prerequisites
 
 To build this sample application, you need:
@@ -81,3 +80,20 @@ When finished with your application, use SAM to delete it from your AWS account.
 ```bash
 sam delete
 ```
+
+## ⚠️ Security and Reliability Notice
+
+This is an example application for demonstration purposes. When deploying such infrastructure in production environments, we strongly encourage you to follow these best practices for improved security and resiliency:
+
+- Enable access logging on API Gateway ([documentation](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-logging.html))
+- Ensure that AWS Lambda function is configured for function-level concurrent execution limit ([concurrency documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html), [configuration guide](https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html))
+- Check encryption settings for Lambda environment variables ([documentation](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars-encryption.html))
+- Ensure that AWS Lambda function is configured for a Dead Letter Queue (DLQ) ([documentation](https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html#invocation-dlq))
+- Ensure that AWS Lambda function is configured inside a VPC when it needs to access private resources ([documentation](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html), [code example](https://github.com/swift-server/swift-aws-lambda-runtime/tree/main/Examples/ServiceLifecycle%2BPostgres))
+
+**Note:** The `openapi.yaml` file in this example is not suited for production. In real-world scenarios, you must:
+1. Ensure that the global security field has rules defined
+2. Ensure that security operations is not empty ([OpenAPI Security Specification](https://learn.openapis.org/specification/security.html))
+3. Follow proper authentication, authorization, input validation, and error handling practices
+
+As per Checkov CKV_OPENAPI_4 and CKV_OPENAPI_5 security checks.

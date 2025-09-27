@@ -49,6 +49,7 @@ builder-bot:
 	docker build -f Dockerfile . -t swift-builder
 
 	# prep directories
+	rm -rf $($@ARTIFACTS_DIR)
 	mkdir -p $($@BUILD_DIR)/lambda $($@ARTIFACTS_DIR)
 
 	# compile application inside Docker image using source code from local project folder
@@ -58,8 +59,9 @@ builder-bot:
 	# create lambda bootstrap file
 	docker run --rm -v $($@BUILD_DIR):/build-target -v `pwd`:/build-src -w /build-src swift-builder bash -cl "cd /build-target/lambda && ln -s $($@PRODUCT) /bootstrap"
   
-	# copy binary to stage
-	cp $($@BUILD_DIR)/release/$($@PRODUCT) $($@STAGE)/bootstrap
+	# copy binary to artifacts dir
+	cp $($@BUILD_DIR)/release/$($@PRODUCT) $($@ARTIFACTS_DIR)/bootstrap
+
+	# copy resources to artifacts dir
+	[ -d "$($@BUILD_DIR)/release/$($@PRODUCT)_$($@PRODUCT).resources" ] && cp $($@BUILD_DIR)/release/$($@PRODUCT)_$($@PRODUCT).resources/* $($@ARTIFACTS_DIR) || true
   
-  	# copy app from stage to artifacts dir
-	cp $($@STAGE)/* $($@ARTIFACTS_DIR)

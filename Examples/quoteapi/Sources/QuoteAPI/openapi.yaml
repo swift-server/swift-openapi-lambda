@@ -1,8 +1,20 @@
+# This is an example API definition not suited for production 
+#
+# In real life scenario, you must 
+# 1. Ensure that the global security field has rules defined
+# 2. Ensure that security operations is not empty.
+#    https://learn.openapis.org/specification/security.html
+#
+# As per Checkov CKV_OPENAPI_4 and CKV_OPENAPI_5
+
 openapi: 3.1.0
 info:
   title: StockQuoteService
   version: 1.0.0
-  
+
+# security:
+#   - defaultApiKey: []
+
 components:
   schemas:
     quote:
@@ -54,3 +66,5 @@ paths:
           description: Authentication required
         404:
           description: Not Found
+      # security:
+      #   - defaultApiKey: []

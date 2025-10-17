@@ -1,4 +1,4 @@
-[![Build & Test on GitHub](https://github.com/swift-server/swift-openapi-lambda/actions/workflows/pull_request.yml/badge.svg)](https://github.com/swift-server/swift-openapi-lambda/actions/workflows//pull_request.yml)
+[![Build & Test on GitHub](https://github.com/awslabs/swift-openapi-lambda/actions/workflows/pull_request.yml/badge.svg)](https://github.com/awslabs/swift-openapi-lambda/actions/workflows//pull_request.yml)
 
 ![language](https://img.shields.io/badge/swift-6.0-blue)
 ![language](https://img.shields.io/badge/swift-6.1-blue)
@@ -39,9 +39,9 @@ dependencies: [
     .package(url: "https://github.com/apple/swift-openapi-runtime.git", from: "1.8.2"),
     
     // add these three dependencies
-    .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "2.0.0-beta.3"),
-    .package(url: "https://github.com/swift-server/swift-aws-lambda-events.git", from: "1.2.0"),
-    .package(url: "https://github.com/swift-server/swift-openapi-lambda.git", from: "2.0.0"),
+    .package(url: "https://github.com/awslabs/swift-aws-lambda-runtime.git", from: "2.0.0"),
+    .package(url: "https://github.com/awslabs/swift-aws-lambda-events.git", from: "1.2.0"),
+    .package(url: "https://github.com/awslabs/swift-openapi-lambda.git", from: "2.0.0"),
 ],
 targets: [
   .executableTarget(
@@ -237,6 +237,6 @@ struct QuoteServiceImpl: APIProtocol, OpenAPILambdaHttpApi {
 ## References
 
 - [Swift OpenAPI Generator](https://swiftpackageindex.com/apple/swift-openapi-generator/documentation) - Complete documentation and tutorials
-- [Swift AWS Lambda Runtime](https://swiftpackageindex.com/swift-server/swift-aws-lambda-runtime) - Swift runtime for AWS Lambda
+- [Swift AWS Lambda Runtime](https://swiftpackageindex.com/awslabs/swift-aws-lambda-runtime) - Swift runtime for AWS Lambda
 - [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) - Serverless Application Model documentation
 - [API Gateway Lambda Authorizers](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html) - Lambda authorization documentation

@@ -18,7 +18,7 @@ The library provides:
 - Built-in support for [Amazon API Gateway HTTP API](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api.html) events
 - Re-exported dependencies to minimize `Package.swift` complexity
 
-We strongly recommend to never deploy openly available API. The QuoteAPI example project shows you how to add a Lambda Authorizer function to the API Gateway.
+We strongly recommend never deploying an openly available API. The QuoteAPI example project shows you how to add a Lambda Authorizer function to the API Gateway.
 ## Prerequisites
 
 - [AWS Account](https://console.aws.amazon.com/)

@@ -3,8 +3,8 @@
 ##
 ## This source file is part of the Swift OpenAPI Lambda open source project
 ##
-## Copyright (c) 2023 Amazon.com, Inc. or its affiliates
-##                    and the Swift OpenAPI Lambda project authors
+## Copyright Swift OpenAPI Lambda project authors
+## Copyright (c) 2023 Amazon.com, Inc. or its affiliates.
 ## Licensed under Apache License v2.0
 ##
 ## See LICENSE.txt for license information
@@ -37,6 +37,7 @@ fatal() { error "$@"; exit 1; }
 test -n "${PROJECT_NAME:-}" || fatal "PROJECT_NAME unset"
 
 if [ -f .license_header_template ]; then
+  log "Using custom license header template"
   # allow projects to override the license header template
   expected_file_header_template=$(cat .license_header_template)
 else
@@ -44,8 +45,8 @@ else
 @@
 @@ This source file is part of the ${PROJECT_NAME} open source project
 @@
-@@ Copyright (c) YEARS Apple Inc. and the ${PROJECT_NAME} project authors
-@@ Licensed under Apache License v2.0
+@@ Copyright Swift OpenAPI Lambda project authors
+@@ Copyright (c) YEARS Amazon.com, Inc. or its affiliates.
 @@
 @@ See LICENSE.txt for license information
 @@ See CONTRIBUTORS.txt for the list of ${PROJECT_NAME} project authors

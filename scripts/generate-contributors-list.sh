@@ -3,8 +3,8 @@
 ##
 ## This source file is part of the Swift OpenAPI Lambda open source project
 ##
-## Copyright (c) 2023 Amazon.com, Inc. or its affiliates
-##                    and the Swift OpenAPI Lambda project authors
+## Copyright Swift OpenAPI Lambda project authors
+## Copyright (c) 2023 Amazon.com, Inc. or its affiliates.
 ## Licensed under Apache License v2.0
 ##
 ## See LICENSE.txt for license information
@@ -48,7 +48,7 @@ contributors=$( cd "$here"/.. && git shortlog -es | cut -f2 | sed 's/^/- /' )
 
 cat > "$here/../CONTRIBUTORS.txt" <<- EOF
 	For the purpose of tracking copyright, this is the list of individuals and
-	organizations who have contributed source code to SwiftOpenAPIGenerator.
+	organizations who have contributed source code to Swift OpenAPI Lambda.
 
 	For employees of an organization/company where the copyright of work done
 	by employees of that company is held by the company itself, only the company
@@ -56,6 +56,7 @@ cat > "$here/../CONTRIBUTORS.txt" <<- EOF
 
 	## COPYRIGHT HOLDERS
 
+	- Amazon.com, Inc. (all contributors with '@amazon.com')
 	- Apple Inc. (all contributors with '@apple.com')
 
 	### Contributors

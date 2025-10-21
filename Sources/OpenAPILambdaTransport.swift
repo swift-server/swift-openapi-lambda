@@ -2,8 +2,8 @@
 //
 // This source file is part of the Swift OpenAPI Lambda open source project
 //
-// Copyright (c) 2023 Amazon.com, Inc. or its affiliates
-//                    and the Swift OpenAPI Lambda project authors
+// Copyright Swift OpenAPI Lambda project authors
+// Copyright (c) 2023 Amazon.com, Inc. or its affiliates.
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -30,9 +30,10 @@ public typealias OpenAPILambdaResponse = (HTTPResponse, String?)
 public typealias OpenAPILambdaRequestParameters = [String: Substring]
 
 /// an OpenAPI handler
-public typealias OpenAPIHandler = @Sendable (HTTPRequest, HTTPBody?, ServerRequestMetadata) async throws -> (
-    HTTPResponse, HTTPBody?
-)
+public typealias OpenAPIHandler =
+    @Sendable (HTTPRequest, HTTPBody?, ServerRequestMetadata) async throws -> (
+        HTTPResponse, HTTPBody?
+    )
 
 /// Lambda Transport for OpenAPI generator
 public struct OpenAPILambdaTransport: ServerTransport, Sendable {

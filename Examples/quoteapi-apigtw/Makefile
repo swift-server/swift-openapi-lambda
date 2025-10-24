@@ -41,8 +41,8 @@ builder-bot:
 	$(eval $@BUILD_SRC = $(PWD)/../..) 
 ## 	$(eval $@BUILD_SRC = $(PWD)) 
 
-##  4. add `cd Examples/quoteapi &&` to the docker BUILD_CMD  
-	$(eval $@BUILD_CMD = "ls && cd Examples/quoteapi && swift build --static-swift-stdlib --product $($@PRODUCT) -c release --build-path /build-target")
+##  4. add `cd Examples/quoteapi-apigtw &&` to the docker BUILD_CMD  
+	$(eval $@BUILD_CMD = "cd Examples/quoteapi-apigtw && swift build --static-swift-stdlib --product $($@PRODUCT) -c release --build-path /build-target")
 ## 	$(eval $@BUILD_CMD = "swift build --static-swift-stdlib --product $($@PRODUCT) -c release --build-path /build-target")
 	
 	# build docker image to compile Swift for Linux

@@ -23,7 +23,7 @@ extension ALBTargetGroupRequest {
         let headers = self.headers ?? [:]
         let scheme = headers.first { $0.key.lowercased() == "x-forwarded-proto" }?.value
         let authority = headers.first { $0.key.lowercased() == "host" }?.value
-        
+
         return HTTPRequest(
             method: self.httpMethod,
             scheme: scheme,

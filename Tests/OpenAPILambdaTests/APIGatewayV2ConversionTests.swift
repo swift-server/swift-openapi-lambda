@@ -20,7 +20,7 @@ import Testing
 @testable import OpenAPILambda
 
 struct APIGatewayV2ConversionTests {
-    
+
     static let apiGatewayEventJSON = """
         {
           "rawQueryString": "",
@@ -53,7 +53,7 @@ struct APIGatewayV2ConversionTests {
           "rawPath": "/stocks/AAPL"
         }
         """
-    
+
     static let apiGatewayEventWithQueryJSON = """
         {
           "rawQueryString": "limit=10&offset=0",
@@ -83,14 +83,14 @@ struct APIGatewayV2ConversionTests {
           "rawPath": "/stocks/AAPL"
         }
         """
-    
+
     @Test("API Gateway v2 request to HTTPRequest conversion")
     func testAPIGatewayV2RequestToHTTPRequest() throws {
         let data = APIGatewayV2ConversionTests.apiGatewayEventJSON.data(using: .utf8)!
         let apiGatewayRequest = try JSONDecoder().decode(APIGatewayV2Request.self, from: data)
-        
+
         let httpRequest = try apiGatewayRequest.httpRequest()
-        
+
         #expect(httpRequest.method == HTTPRequest.Method.get)
         #expect(httpRequest.path == "/stocks/AAPL")
         #expect(httpRequest.scheme == "https")
@@ -99,25 +99,25 @@ struct APIGatewayV2ConversionTests {
         #expect(httpRequest.headerFields[HTTPField.Name.userAgent] == "curl/8.1.2")
         #expect(httpRequest.headerFields[HTTPField.Name.authorization] == "Bearer 123")
     }
-    
+
     @Test("API Gateway v2 request with query string")
     func testAPIGatewayV2RequestWithQueryString() throws {
         let data = APIGatewayV2ConversionTests.apiGatewayEventWithQueryJSON.data(using: .utf8)!
         let apiGatewayRequest = try JSONDecoder().decode(APIGatewayV2Request.self, from: data)
-        
+
         let httpRequest = try apiGatewayRequest.httpRequest()
-        
+
         #expect(httpRequest.path == "/stocks/AAPL?limit=10&offset=0")
     }
-    
+
     @Test("HTTPResponse to API Gateway v2 response conversion")
     func testHTTPResponseToAPIGatewayV2Response() throws {
         var httpResponse = HTTPResponse(status: .ok)
         httpResponse.headerFields[HTTPField.Name.contentType] = "application/json"
         httpResponse.headerFields[HTTPField.Name.contentLength] = "42"
-        
+
         let apiGatewayResponse = APIGatewayV2Response(from: httpResponse)
-        
+
         #expect(apiGatewayResponse.statusCode == .ok)
         #expect(apiGatewayResponse.headers?[HTTPField.Name.contentType.rawName] == "application/json")
         #expect(apiGatewayResponse.headers?[HTTPField.Name.contentLength.rawName] == "42")

@@ -20,28 +20,28 @@ import Testing
 
 @Suite("HTTP Headers Conversion Tests")
 struct HTTPHeadersConversionTests {
-    
+
     @Test("Multi-value headers preserved as comma-separated")
     func testMultiValueHeadersPreserved() throws {
         var httpResponse = HTTPResponse(status: .ok)
         httpResponse.headerFields.append(HTTPField(name: HTTPField.Name.setCookie, value: "session=abc123"))
         httpResponse.headerFields.append(HTTPField(name: HTTPField.Name.setCookie, value: "theme=dark"))
-        
+
         let albResponse = ALBTargetGroupResponse(from: httpResponse)
-        
+
         #expect(albResponse.headers?[HTTPField.Name.setCookie.rawName] == "session=abc123, theme=dark")
         #expect(albResponse.multiValueHeaders == nil)
     }
-    
+
     @Test("HTTPHeaders to HTTPFields conversion")
     func testHTTPHeadersToHTTPFields() throws {
         let headers: HTTPHeaders = [
             "Set-Cookie": "session=abc123, theme=dark",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         ]
-        
+
         let httpFields = headers.httpFields()
-        
+
         #expect(httpFields[HTTPField.Name.setCookie] == "session=abc123, theme=dark")
         #expect(httpFields[HTTPField.Name.contentType] == "application/json")
     }

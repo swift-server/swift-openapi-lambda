@@ -2,8 +2,8 @@
 //
 // This source file is part of the Swift OpenAPI Lambda open source project
 //
-// Copyright (c) 2023 Amazon.com, Inc. or its affiliates
-//                    and the Swift OpenAPI Lambda project authors
+// Copyright Swift OpenAPI Lambda project authors
+// Copyright (c) Amazon.com, Inc. or its affiliates.
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information

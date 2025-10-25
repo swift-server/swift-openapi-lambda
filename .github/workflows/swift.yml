@@ -1,0 +1,19 @@
+# Simple test to obtain a green badge when merging to main branch
+
+name: Swift Simple Check
+
+on:  
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: swift build -v
+    - name: Run tests
+      run: swift test -v

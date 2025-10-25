@@ -20,12 +20,16 @@ extension ALBTargetGroupRequest {
 
     /// Return an `HTTPRequest` for this `ALBTargetGroupRequest`
     public func httpRequest() throws -> HTTPRequest {
-        HTTPRequest(
+        let headers = self.headers ?? [:]
+        let scheme = headers.first { $0.key.lowercased() == "x-forwarded-proto" }?.value
+        let authority = headers.first { $0.key.lowercased() == "host" }?.value
+        
+        return HTTPRequest(
             method: self.httpMethod,
-            scheme: self.headers?["X-Forwarded-Proto"],
-            authority: self.headers?["Host"],
+            scheme: scheme,
+            authority: authority,
             path: self.path,
-            headerFields: self.headers?.httpFields() ?? [:]
+            headerFields: headers.httpFields()
         )
     }
 }

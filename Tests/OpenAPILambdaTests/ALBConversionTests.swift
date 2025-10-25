@@ -111,8 +111,8 @@ struct ALBConversionTests {
         
         let httpRequest = try albRequest.httpRequest()
         
-        #expect(httpRequest.scheme == nil)
-        #expect(httpRequest.authority == nil)
+        #expect(httpRequest.scheme == "https")
+        #expect(httpRequest.authority == "lambda-alb-123578498.us-east-1.elb.amazonaws.com")
     }
     
     @Test("HTTPResponse to ALB response conversion")

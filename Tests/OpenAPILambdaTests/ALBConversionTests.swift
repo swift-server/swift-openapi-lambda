@@ -55,6 +55,66 @@ struct ALBConversionTests {
         #expect(httpRequest.headerFields[HTTPField.Name.userAgent] == "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
     }
     
+    @Test("ALB X-Forwarded-Proto and Host mapping")
+    func testALBForwardedHeaders() throws {
+        let albEventWithForwardedHeaders = """
+            {
+              "requestContext": {
+                "elb": {
+                  "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/lambda-target/50dc6c495c0c9188"
+                }
+              },
+              "httpMethod": "GET",
+              "path": "/stocks/AAPL",
+              "queryStringParameters": {},
+              "headers": {
+                "Host": "lambda-alb-123578498.us-east-1.elb.amazonaws.com",
+                "X-Forwarded-Proto": "https"
+              },
+              "body": "",
+              "isBase64Encoded": false
+            }
+            """
+        
+        let data = albEventWithForwardedHeaders.data(using: .utf8)!
+        let albRequest = try JSONDecoder().decode(ALBTargetGroupRequest.self, from: data)
+        
+        let httpRequest = try albRequest.httpRequest()
+        
+        #expect(httpRequest.scheme == "https")
+        #expect(httpRequest.authority == "lambda-alb-123578498.us-east-1.elb.amazonaws.com")
+    }
+    
+    @Test("ALB lowercase headers mapping")
+    func testALBLowercaseHeaders() throws {
+        let albEventWithLowercaseHeaders = """
+            {
+              "requestContext": {
+                "elb": {
+                  "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/lambda-target/50dc6c495c0c9188"
+                }
+              },
+              "httpMethod": "GET",
+              "path": "/stocks/AAPL",
+              "queryStringParameters": {},
+              "headers": {
+                "host": "lambda-alb-123578498.us-east-1.elb.amazonaws.com",
+                "x-forwarded-proto": "https"
+              },
+              "body": "",
+              "isBase64Encoded": false
+            }
+            """
+        
+        let data = albEventWithLowercaseHeaders.data(using: .utf8)!
+        let albRequest = try JSONDecoder().decode(ALBTargetGroupRequest.self, from: data)
+        
+        let httpRequest = try albRequest.httpRequest()
+        
+        #expect(httpRequest.scheme == nil)
+        #expect(httpRequest.authority == nil)
+    }
+    
     @Test("HTTPResponse to ALB response conversion")
     func testHTTPResponseToALBResponse() throws {
         var httpResponse = HTTPResponse(status: .ok)

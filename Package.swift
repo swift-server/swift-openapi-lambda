@@ -26,7 +26,8 @@ let package = Package(
         .testTarget(
             name: "OpenAPILambdaTests",
             dependencies: [
-                .byName(name: "OpenAPILambda")
+                .byName(name: "OpenAPILambda"),
+                .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-events"),
             ]
         ),
     ]

@@ -1,0 +1,149 @@
+# This is an example SAM template for the purpose of this project.
+# When deploying such infrastructure in production environment,
+# we strongly encourage you to follow these best practices for improved security and resiliency
+# - Enable access loggin on API Gateway
+#   See: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-logging.html)
+# - Ensure that AWS Lambda function is configured for function-level concurrent execution limit
+#   See: https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html
+#        https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html
+# - Check encryption settings for Lambda environment variable
+#   See: https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars-encryption.html
+# - Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)
+#   See: https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html#invocation-dlq
+# - Ensure that AWS Lambda function is configured inside a VPC when it needs to access private resources
+#   See: https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
+#   Code Example: https://github.com/awslabs/swift-aws-lambda-runtime/tree/main/Examples/ServiceLifecycle%2BPostgres
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: QuoteAPI ALB Example
+
+Resources:
+  QuoteServiceALB:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: bootstrap
+      Runtime: provided.al2023
+      Architectures:
+        - arm64
+      MemorySize: 128
+      Timeout: 30
+      Environment:
+        Variables:
+          LOG_LEVEL: trace
+    Metadata:
+      BuildMethod: makefile
+
+  # Lambda permission for ALB
+  ALBLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt QuoteServiceALB.Arn
+      Action: lambda:InvokeFunction
+      Principal: elasticloadbalancing.amazonaws.com
+
+  # Target Group for Lambda
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: ALBLambdaInvokePermission
+    Properties:
+      TargetType: lambda
+      Targets:
+        - Id: !GetAtt QuoteServiceALB.Arn
+
+  # Application Load Balancer
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+
+  # HTTP Listener (HTTPS requires valid domain certificate)
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+
+  # VPC for ALB
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  Route:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref RouteTable
+
+  SubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref RouteTable
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for ALB
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  ALBUrl:
+    Description: Application Load Balancer URL
+    Value: !Sub "http://${ApplicationLoadBalancer.DNSName}/stocks/AAPL"

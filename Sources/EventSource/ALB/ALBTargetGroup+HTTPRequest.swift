@@ -22,8 +22,8 @@ extension ALBTargetGroupRequest {
     public func httpRequest() throws -> HTTPRequest {
         HTTPRequest(
             method: self.httpMethod,
-            scheme: nil,
-            authority: nil,
+            scheme: self.headers?["X-Forwarded-Proto"],
+            authority: self.headers?["Host"],
             path: self.path,
             headerFields: self.headers?.httpFields() ?? [:]
         )
@@ -32,7 +32,7 @@ extension ALBTargetGroupRequest {
 
 extension ALBTargetGroupResponse {
 
-    /// Create a `APIGatewayV2Response` from an `HTTPResponse`
+    /// Create an `ALBTargetGroupResponse` from an `HTTPResponse`
     public init(from response: HTTPResponse) {
         self = ALBTargetGroupResponse(
             statusCode: response.status,

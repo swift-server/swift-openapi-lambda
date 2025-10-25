@@ -63,7 +63,7 @@ Resources:
       SecurityGroups:
         - !Ref ALBSecurityGroup
 
-  # Listener
+  # HTTP Listener (HTTPS requires valid domain certificate)
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:

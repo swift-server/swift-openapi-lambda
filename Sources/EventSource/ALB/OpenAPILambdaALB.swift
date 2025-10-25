@@ -18,7 +18,7 @@ import AWSLambdaEvents
 import OpenAPIRuntime
 import HTTPTypes
 
-/// An specialization of the `OpenAPILambda` protocol that works with Amazon API Gateway HTTP Mode, aka API Gateway v2
+/// An specialization of the `OpenAPILambda` protocol that works with an Application Load Balancer
 public protocol OpenAPILambdaALB: OpenAPILambdaService
 where
     Event == ALBTargetGroupRequest,
@@ -27,12 +27,12 @@ where
 
 
 extension OpenAPILambdaALB {
-    /// Transform a Lambda input (`APIGatewayV2Request` and `LambdaContext`) to an OpenAPILambdaRequest (`HTTPRequest`, `String?`)
+    /// Transform a Lambda input (`ALBTargetGroupRequest` and `LambdaContext`) to an OpenAPILambdaRequest (`HTTPRequest`, `String?`)
     public func request(context: LambdaContext, from request: Event) throws -> OpenAPILambdaRequest {
         (try request.httpRequest(), request.body)
     }
 
-    /// Transform an OpenAPI response (`HTTPResponse`, `String?`) to a Lambda Output (`APIGatewayV2Response`)
+    /// Transform an OpenAPI response (`HTTPResponse`, `String?`) to a Lambda Output (`ALBTargetGroupResponse`)
     public func output(from response: OpenAPILambdaResponse) -> Output {
         var apiResponse = ALBTargetGroupResponse(from: response.0)
         apiResponse.body = response.1 ?? ""

@@ -1,0 +1,54 @@
+openapi: 3.1.0
+info:
+  title: StockQuoteService
+  version: 1.0.0
+  
+components:
+  schemas:
+    quote:
+      type: object
+      properties:
+        symbol:
+          type: string
+        price:
+          type: number
+        change:
+          type: number
+        changePercent:
+          type: number
+        volume:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+          
+paths:
+  /stocks/{symbol}:
+    get:
+      summary: Get the latest quote for a stock
+      operationId: getQuote
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      tags:
+        - stocks
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/quote'
+        400:
+          description: Bad Request
+        404:
+          description: Not Found

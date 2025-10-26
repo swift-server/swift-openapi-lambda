@@ -27,8 +27,8 @@ extension APIGatewayV2Request {
     public func httpRequest() throws -> HTTPRequest {
         HTTPRequest(
             method: self.context.http.method,
-            scheme: "https",
-            authority: "",
+            scheme: "https",  // APIGateway is always HTTPS
+            authority: self.headers["Host"],
             path: pathWithQueryString,
             headerFields: self.headers.httpFields()
         )
@@ -45,19 +45,5 @@ extension APIGatewayV2Response {
             isBase64Encoded: false,
             cookies: nil
         )
-    }
-}
-
-public extension HTTPHeaders {
-    /// Create an `HTTPFields` (from `HTTPTypes` library) from this APIGateway `HTTPHeader`
-    func httpFields() -> HTTPFields {
-        HTTPFields(self.map { key, value in HTTPField(name: .init(key)!, value: value) })
-    }
-
-    /// Create HTTPHeaders from HTTPFields
-    init(from fields: HTTPFields) {
-        var headers: HTTPHeaders = [:]
-        fields.forEach { headers[$0.name.rawName] = $0.value }
-        self = headers
     }
 }
